@@ -210,6 +210,8 @@
     font-family: var(--font); font-size: 11px; color: var(--danger-text); background: transparent;
     border: none; cursor: pointer; padding: 0 0 0 8px; text-decoration: underline;
   }
+  .diario-entry-editing { border-color: var(--accent, #7A6A52); }
+  .del-entry-btn { margin-right: 4px; }
 </style>
 </head>
 <body>
@@ -452,7 +454,12 @@ function parseEtapas(raw) {
 }
 
 const diarioState = {};
+const editingState = {};
 const RESP_LABEL = { kaua: "Kauã", jp: "João Paulo", outro: "Outro" };
+
+function escapeAttr(str) {
+  return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
 
 function renderDiario(card, id) {
   const entries = (diarioState[id] || []).slice().sort((a, b) => (a.data < b.data ? 1 : -1));
@@ -463,6 +470,42 @@ function renderDiario(card, id) {
   }
   const today = todayISO();
   listEl.innerHTML = entries.map(e => {
+    if (isAdmin && editingState[id] === e.id) {
+      const prazosArr = Array.isArray(e.prazos) ? e.prazos.filter(Boolean) : (e.prazo ? [e.prazo] : []);
+      return `
+        <li class="diario-entry diario-entry-editing">
+          <div class="diario-form-row">
+            <div>
+              <label class="diario-form-label">Responsável</label>
+              <select data-edit-field="responsavel">
+                <option value="kaua" ${e.responsavel === "kaua" ? "selected" : ""}>Kauã</option>
+                <option value="jp" ${e.responsavel === "jp" ? "selected" : ""}>João Paulo</option>
+                <option value="outro" ${e.responsavel === "outro" ? "selected" : ""}>Outro</option>
+              </select>
+            </div>
+            <div>
+              <label class="diario-form-label">Data</label>
+              <input type="date" data-edit-field="data" value="${escapeAttr(e.data)}">
+            </div>
+          </div>
+          <div class="prazos-fieldset">
+            <label class="diario-form-label">Prazos prometidos</label>
+            <div class="prazos-inline">
+              <div><label>Prazo 1</label><input type="date" data-edit-field="prazo1" value="${escapeAttr(prazosArr[0] || "")}"></div>
+              <div><label>Prazo 2</label><input type="date" data-edit-field="prazo2" value="${escapeAttr(prazosArr[1] || "")}"></div>
+              <div><label>Prazo 3</label><input type="date" data-edit-field="prazo3" value="${escapeAttr(prazosArr[2] || "")}"></div>
+            </div>
+          </div>
+          <label class="diario-form-label">O que foi dito / combinado</label>
+          <textarea data-edit-field="nota">${e.nota}</textarea>
+          <div style="margin-top:8px; text-align:right; display:flex; gap:8px; justify-content:flex-end">
+            <button class="admin-btn" data-canceledit="${id}" type="button">Cancelar</button>
+            <button class="add-btn" data-saveedit="${id}" data-entryid="${e.id}" type="button">Salvar edição</button>
+          </div>
+        </li>
+      `;
+    }
+
     const whoCls = e.responsavel === "jp" ? "jp" : "";
     const whoLabel = RESP_LABEL[e.responsavel] || "Outro";
     const prazos = Array.isArray(e.prazos) ? e.prazos.filter(Boolean) : (e.prazo ? [e.prazo] : []);
@@ -478,12 +521,16 @@ function renderDiario(card, id) {
       const badge = prazos.length > 1 ? `<span class="reprogramado-badge">reprogramado ${prazos.length - 1}x</span>` : "";
       prazoHTML = `<div class="prazo-chips">${chips}${badge}</div>`;
     }
+    const adminBtns = isAdmin
+      ? `<button class="del-entry-btn" data-editentry="${id}" data-entryid="${e.id}" type="button" style="color:var(--accent)">Editar</button>
+         <button class="del-entry-btn" data-delentry="${id}" data-entryid="${e.id}" type="button">Excluir</button>`
+      : "";
     return `
       <li class="diario-entry">
         <div class="diario-entry-head">
           <span class="diario-who ${whoCls}">${whoLabel}</span>
           <span class="diario-date">${formatDatePt(e.data)}</span>
-          ${isAdmin ? `<button class="del-entry-btn" data-delentry="${id}" data-entryid="${e.id}" type="button">Excluir</button>` : ""}
+          ${adminBtns}
         </div>
         <p class="diario-nota">${e.nota}</p>
         ${prazoHTML}
@@ -609,6 +656,61 @@ async function addDiarioEntry(id) {
   saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 3000);
 }
 
+function startEditDiarioEntry(id, entryId) {
+  editingState[id] = entryId;
+  const card = grid.querySelector(`[data-id="${id}"]`);
+  renderDiario(card, id);
+}
+
+function cancelEditDiarioEntry(id) {
+  editingState[id] = null;
+  const card = grid.querySelector(`[data-id="${id}"]`);
+  renderDiario(card, id);
+}
+
+async function saveDiarioEdit(id, entryId) {
+  const card = grid.querySelector(`[data-id="${id}"]`);
+  const li = card.querySelector(`[data-saveedit="${id}"]`).closest("li");
+  const responsavel = li.querySelector('[data-edit-field="responsavel"]').value;
+  const data = li.querySelector('[data-edit-field="data"]').value;
+  const prazo1 = li.querySelector('[data-edit-field="prazo1"]').value;
+  const prazo2 = li.querySelector('[data-edit-field="prazo2"]').value;
+  const prazo3 = li.querySelector('[data-edit-field="prazo3"]').value;
+  const nota = li.querySelector('[data-edit-field="nota"]').value.trim();
+
+  if (!nota) {
+    globalStatus.textContent = "O texto do registro não pode ficar vazio.";
+    return;
+  }
+
+  const entries = diarioState[id] || [];
+  const idx = entries.findIndex(e => e.id === entryId);
+  if (idx === -1) return;
+  entries[idx] = {
+    ...entries[idx],
+    responsavel,
+    data: data || entries[idx].data,
+    prazos: [prazo1, prazo2, prazo3].filter(Boolean),
+    nota
+  };
+
+  editingState[id] = null;
+  renderDiario(card, id);
+
+  try {
+    const existing = await window.storage.get(STORAGE_KEY, SHARED).catch(() => null);
+    const all = existing && existing.value ? JSON.parse(existing.value) : {};
+    all[id] = all[id] || {};
+    all[id].diario = diarioState[id];
+    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(all), SHARED);
+    globalStatus.textContent = result ? "Registro editado." : "Não foi possível salvar a edição.";
+  } catch (err) {
+    globalStatus.textContent = "Não foi possível salvar a edição.";
+  }
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 3000);
+}
+
 async function deleteDiarioEntry(id, entryId) {
   const card = grid.querySelector(`[data-id="${id}"]`);
   diarioState[id] = (diarioState[id] || []).filter(e => e.id !== entryId);
@@ -674,7 +776,16 @@ grid.addEventListener("click", (e) => {
   if (addBtn) { addDiarioEntry(addBtn.getAttribute("data-adddiario")); return; }
 
   const delBtn = e.target.closest("[data-delentry]");
-  if (delBtn) deleteDiarioEntry(delBtn.getAttribute("data-delentry"), delBtn.getAttribute("data-entryid"));
+  if (delBtn) { deleteDiarioEntry(delBtn.getAttribute("data-delentry"), delBtn.getAttribute("data-entryid")); return; }
+
+  const editBtn = e.target.closest("[data-editentry]");
+  if (editBtn) { startEditDiarioEntry(editBtn.getAttribute("data-editentry"), editBtn.getAttribute("data-entryid")); return; }
+
+  const cancelBtn = e.target.closest("[data-canceledit]");
+  if (cancelBtn) { cancelEditDiarioEntry(cancelBtn.getAttribute("data-canceledit")); return; }
+
+  const saveEditBtn = e.target.closest("[data-saveedit]");
+  if (saveEditBtn) saveDiarioEdit(saveEditBtn.getAttribute("data-saveedit"), saveEditBtn.getAttribute("data-entryid"));
 });
 
 loadAll();
