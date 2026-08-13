@@ -91,6 +91,16 @@
   }
   textarea { min-height: 54px; line-height: 1.45; }
   textarea:focus, input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  textarea.lockable {
+    border: none; background: transparent; padding: 0; resize: none;
+    cursor: default; color: var(--text); overflow: hidden;
+  }
+  textarea.lockable:focus { outline: none; }
+  textarea.lockable.unlocked {
+    border: 1px solid var(--border-strong); background: var(--bg); padding: 8px 10px;
+    resize: vertical; cursor: text; overflow: auto;
+  }
+  textarea.lockable.unlocked:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .update-row {
     display: flex; align-items: center; gap: 8px; margin-top: 12px;
@@ -221,7 +231,7 @@
     <p>Atualize a posição diária que o Kauã te passa. Cada card salva sozinho no seu navegador.</p>
     <div class="status-banner" id="global-status"></div>
     <div class="admin-row">
-      <span class="admin-state" id="admin-state">Modo padrão: qualquer pessoa pode preencher e adicionar registros, ninguém pode apagar.</span>
+      <span class="admin-state" id="admin-state">Modo padrão: qualquer pessoa pode adicionar registros no diário. Status e pendências só o administrador edita.</span>
       <button class="admin-btn" id="admin-toggle" type="button">Entrar como administrador</button>
     </div>
   </header>
@@ -365,10 +375,10 @@ function cardHTML(t) {
       <p class="meta">${t.meta}</p>
 
       <p class="field-label">Status / pendência atual</p>
-      <textarea data-field="status">${t.defaults.status}</textarea>
+      <textarea data-field="status" class="lockable" readonly>${t.defaults.status}</textarea>
 
       <p class="field-label">Quem está cobrando / próximo passo</p>
-      <textarea data-field="cobranca">${t.defaults.cobranca}</textarea>
+      <textarea data-field="cobranca" class="lockable" readonly>${t.defaults.cobranca}</textarea>
 
       <div class="update-row">
         <label class="field-label" style="margin:0" for="date-${t.id}">Última atualização</label>
@@ -552,12 +562,27 @@ function renderStepper(card, etapas, etapaAtualRaw) {
 
 grid.innerHTML = TERRENOS.map(cardHTML).join("");
 
+function autosizeLockable(el) {
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
+
+function applyLockState() {
+  grid.querySelectorAll("textarea.lockable").forEach(el => {
+    el.readOnly = !isAdmin;
+    el.classList.toggle("unlocked", isAdmin);
+    if (!isAdmin) autosizeLockable(el);
+    else el.style.height = "";
+  });
+}
+
 TERRENOS.forEach(t => {
   const card = grid.querySelector(`[data-id="${t.id}"]`);
   renderStepper(card, t.defaults.etapas, t.defaults.etapaAtual);
   diarioState[t.id] = ensureIds(t.defaults.diario ? t.defaults.diario.slice() : []);
   renderDiario(card, t.id);
 });
+applyLockState();
 
 async function loadAll() {
   globalStatus.textContent = "Carregando dados salvos...";
@@ -587,6 +612,7 @@ async function loadAll() {
   } catch (err) {
     globalStatus.textContent = "Nenhum dado salvo ainda — preencha e clique em salvar.";
   }
+  applyLockState();
 }
 
 async function saveCard(id) {
@@ -737,7 +763,7 @@ adminToggleBtn.addEventListener("click", () => {
     isAdmin = false;
     adminToggleBtn.textContent = "Entrar como administrador";
     adminToggleBtn.classList.remove("active");
-    adminStateEl.textContent = "Modo padrão: qualquer pessoa pode preencher e adicionar registros, ninguém pode apagar.";
+    adminStateEl.textContent = "Modo padrão: qualquer pessoa pode adicionar registros no diário. Status e pendências só o administrador edita.";
   } else {
     const pin = window.prompt("PIN de administrador:");
     if (pin === null) return;
@@ -745,7 +771,7 @@ adminToggleBtn.addEventListener("click", () => {
       isAdmin = true;
       adminToggleBtn.textContent = "Sair do modo administrador";
       adminToggleBtn.classList.add("active");
-      adminStateEl.textContent = "Modo administrador ativo: você pode excluir registros do diário.";
+      adminStateEl.textContent = "Modo administrador ativo: você pode editar status/pendências, editar e excluir registros do diário.";
     } else {
       globalStatus.textContent = "PIN incorreto.";
       if (saveTimer) clearTimeout(saveTimer);
@@ -753,6 +779,7 @@ adminToggleBtn.addEventListener("click", () => {
       return;
     }
   }
+  applyLockState();
   TERRENOS.forEach(t => {
     const card = grid.querySelector(`[data-id="${t.id}"]`);
     renderDiario(card, t.id);
