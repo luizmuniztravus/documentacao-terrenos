@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/SEU_USUARIO_CPANEL/public_html/
+    - export DEPLOYPATH=/home1/thesm705/travuscapital.com.br/docterrenos/
     - /bin/cp -R * $DEPLOYPATH
