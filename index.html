@@ -4,219 +4,270 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel de documentação — terrenos Carvalho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #F7F6F2;
-    --card: #FFFFFF;
-    --border: #E3E0D8;
-    --border-strong: #C9C5B8;
-    --text: #2B2A26;
-    --text-secondary: #6B6A62;
-    --text-muted: #9B9A90;
-    --accent: #7A6A52;
-    --danger-bg: #FBEAE5;
-    --danger-text: #A3402A;
-    --danger-border: #E8B7A6;
-    --warn-bg: #FBF1DE;
-    --warn-text: #8A5B10;
-    --ok-bg: #E8EFE3;
-    --ok-text: #3E6B34;
-    --radius: 12px;
-    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    --paper: #F4EEDD;
+    --paper-raised: #FCF9EE;
+    --ink: #262319;
+    --ink-soft: #6C6450;
+    --ink-faint: #A79C7E;
+    --line: #DED0AC;
+    --line-strong: #C2B183;
+    --teal: #2E5C53;
+    --teal-tint: #E4ECE7;
+    --gold: #90691C;
+    --gold-tint: #F1E7CC;
+    --red: #9A3A28;
+    --red-tint: #F2E0D8;
+    --radius: 6px;
+    --font: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: "Fraunces", Georgia, serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --bg: var(--paper);
+    --card: var(--paper-raised);
+    --border: var(--line);
+    --border-strong: var(--line-strong);
+    --text: var(--ink);
+    --text-secondary: var(--ink-soft);
+    --text-muted: var(--ink-faint);
+    --accent: var(--teal);
+    --danger-bg: var(--red-tint);
+    --danger-text: var(--red);
+    --warn-bg: var(--gold-tint);
+    --warn-text: var(--gold);
+    --ok-bg: var(--teal-tint);
+    --ok-text: var(--teal);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1C1B18;
-      --card: #24231F;
-      --border: #38362F;
-      --border-strong: #4A4840;
-      --text: #EDECE6;
-      --text-secondary: #B0AEA3;
-      --text-muted: #7C7A70;
-      --accent: #C9B896;
-      --danger-bg: #3A2420;
-      --danger-text: #E8A08C;
-      --danger-border: #5C3128;
-      --warn-bg: #3A2E14;
-      --warn-text: #E8C070;
-      --ok-bg: #22301D;
-      --ok-text: #A0C890;
+      --paper: #1B1913;
+      --paper-raised: #242018;
+      --ink: #EDE5CE;
+      --ink-soft: #B3A88A;
+      --ink-faint: #7A7157;
+      --line: #3C3626;
+      --line-strong: #524A34;
+      --teal: #7FB8AA;
+      --teal-tint: #22322D;
+      --gold: #DCB059;
+      --gold-tint: #332A16;
+      --red: #E0917E;
+      --red-tint: #362119;
     }
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     background: var(--bg);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px);
+    background-size: 100% 32px;
+    background-attachment: local;
     color: var(--text);
     font-family: var(--font);
-    padding: 2rem 1.25rem 4rem;
+    padding: 3rem 1.25rem 4rem;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 920px; margin: 0 auto; }
-  header { margin-bottom: 1.5rem; }
-  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
-  header p { font-size: 13px; color: var(--text-secondary); margin: 0; }
+  @media (prefers-color-scheme: dark) { body { background-image: none; } }
+  .wrap { max-width: 960px; margin: 0 auto; }
+
+  header { margin-bottom: 2.25rem; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--teal); margin: 0 0 10px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--border-strong); }
+  h1 {
+    font-family: var(--font-display); font-style: italic; font-weight: 500;
+    font-size: 30px; letter-spacing: -0.01em; margin: 0 0 6px; line-height: 1.15;
+  }
+  header p { font-size: 13.5px; color: var(--text-secondary); margin: 0; max-width: 46em; }
+  header > hr {
+    border: none; border-top: 1px solid var(--border-strong); margin: 18px 0 0;
+  }
   .status-banner {
-    font-size: 12px; color: var(--text-muted); margin-top: 10px;
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); margin-top: 12px;
     display: flex; align-items: center; gap: 6px; min-height: 16px;
   }
+  .admin-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+  .admin-state { font-size: 12px; color: var(--text-muted); }
+  .admin-btn {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--text-secondary); background: transparent;
+    border: 1px solid var(--border-strong); border-radius: var(--radius);
+    padding: 6px 12px; cursor: pointer;
+  }
+  .admin-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .admin-btn.active { color: var(--red); border-color: var(--red); }
+
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 14px;
+    gap: 18px;
   }
   .card {
     background: var(--card);
     border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
     border-radius: var(--radius);
-    padding: 1.1rem 1.25rem;
+    padding: 1.15rem 1.3rem;
+    box-shadow: 0 1px 2px rgba(38, 35, 25, 0.04);
   }
-  .card.priority { border: 2px solid var(--danger-text); }
-  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
-  .card-title { font-size: 16px; font-weight: 600; margin: 0; }
-  .meta { font-size: 12.5px; color: var(--text-secondary); margin: 2px 0 12px; }
-  .badge {
-    font-size: 11px; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
-    background: var(--warn-bg); color: var(--warn-text); font-weight: 500;
+  .card.priority { border-left: 3px solid var(--red); }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 2px; }
+  .card-title {
+    font-family: var(--font-display); font-weight: 600; font-size: 19px; margin: 0;
   }
-  .badge.danger { background: var(--danger-bg); color: var(--danger-text); }
-  .badge.info { background: var(--ok-bg); color: var(--ok-text); }
+  .meta {
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--text-secondary);
+    margin: 4px 0 14px; line-height: 1.6;
+  }
+
+  .badge, .diario-who, .reprogramado-badge {
+    font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+    padding: 3px 9px; border-radius: 3px; border: 1.3px solid currentColor;
+    background: transparent; display: inline-block; transform: rotate(-1.2deg);
+  }
+  .badge { background: var(--warn-tint, transparent); color: var(--warn-text); background: var(--warn-bg); }
+  .badge.danger { color: var(--danger-text); background: var(--danger-bg); }
+  .badge.info { color: var(--ok-text); background: var(--ok-bg); }
+
   .field-label {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;
-    color: var(--text-muted); margin: 12px 0 4px; font-weight: 600;
+    font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-muted); margin: 14px 0 5px; font-weight: 500;
   }
   textarea, input[type="text"] {
     width: 100%; font-family: var(--font); font-size: 13.5px; color: var(--text);
-    background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius);
     padding: 8px 10px; resize: vertical;
   }
-  textarea { min-height: 54px; line-height: 1.45; }
-  textarea:focus, input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  textarea { min-height: 54px; line-height: 1.5; }
+  textarea:focus, input:focus, select:focus {
+    outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal);
+  }
   .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .update-row {
-    display: flex; align-items: center; gap: 8px; margin-top: 12px;
-    padding-top: 10px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px; margin-top: 14px;
+    padding-top: 12px; border-top: 1px dashed var(--border-strong);
   }
+  .update-row label { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
   .update-row input[type="date"] {
-    font-family: var(--font); font-size: 13px; color: var(--text);
-    background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px;
+    font-family: var(--font-mono); font-size: 12.5px; color: var(--text);
+    background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius);
     padding: 6px 8px;
   }
-  .save-btn {
-    margin-left: auto; font-family: var(--font); font-size: 12.5px; font-weight: 500;
-    color: var(--accent); background: transparent; border: 1px solid var(--border-strong);
-    border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  .save-btn, .add-btn {
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase; border-radius: var(--radius); padding: 7px 14px; cursor: pointer;
   }
-  .save-btn:hover { background: var(--bg); }
-  .save-btn:active { transform: scale(0.98); }
-  .last-saved { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+  .save-btn {
+    margin-left: auto; color: var(--teal); background: transparent; border: 1px solid var(--teal);
+  }
+  .save-btn:hover { background: var(--teal-tint); }
+  .save-btn:active, .add-btn:active { transform: scale(0.98); }
+  .add-btn { color: var(--paper-raised); background: var(--teal); border: 1px solid var(--teal); }
+  .add-btn:hover { background: #244A43; }
+  .last-saved { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); margin-top: 7px; }
 
   .etapas-toggle {
-    margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
-    font-family: var(--font); font-size: 12.5px; font-weight: 500; color: var(--accent);
+    margin-top: 14px; padding-top: 11px; border-top: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--teal);
     background: transparent; border-left: none; border-right: none; border-bottom: none;
-    cursor: pointer; display: flex; align-items: center; gap: 6px; width: 100%;
+    cursor: pointer; display: flex; align-items: center; gap: 7px; width: 100%;
   }
-  .etapas-toggle .chev { transition: transform 0.15s ease; font-size: 11px; }
+  .etapas-toggle .chev { transition: transform 0.15s ease; font-size: 12px; font-family: var(--font); }
   .etapas-toggle.open .chev { transform: rotate(90deg); }
   .etapas-body { display: none; margin-top: 10px; }
   .etapas-body.open { display: block; }
-  .etapas-edit-label {
-    font-size: 11px; color: var(--text-muted); margin: 6px 0 4px;
-  }
+  .etapas-edit-label { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); margin: 8px 0 5px; }
   .etapas-row { display: flex; gap: 10px; align-items: flex-start; }
   .etapas-row textarea { flex: 1; min-height: 90px; font-size: 12.5px; }
   .etapa-atual-field { width: 90px; flex: none; }
-  .etapa-atual-field label { display: block; font-size: 10.5px; color: var(--text-muted); margin-bottom: 4px; }
+  .etapa-atual-field label { display: block; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px; }
   .etapa-atual-field input {
-    width: 100%; font-family: var(--font); font-size: 13px; text-align: center;
-    background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px; padding: 6px;
+    width: 100%; font-family: var(--font-mono); font-size: 13px; text-align: center;
+    background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 6px;
   }
-  .stepper { list-style: none; margin: 10px 0 0; padding: 0; }
-  .stepper li {
-    display: flex; align-items: flex-start; gap: 10px; font-size: 13px;
-    padding: 5px 0; color: var(--text-muted);
-  }
-  .stepper .dot {
-    width: 16px; height: 16px; border-radius: 50%; flex: none; margin-top: 1px;
-    border: 1.5px solid var(--border-strong); display: flex; align-items: center;
-    justify-content: center; font-size: 10px; color: transparent;
-  }
-  .stepper li.done { color: var(--text-secondary); text-decoration: line-through; text-decoration-color: var(--border-strong); }
-  .stepper li.done .dot { background: var(--ok-bg); border-color: var(--ok-text); color: var(--ok-text); }
-  .stepper li.current { color: var(--text); font-weight: 600; }
-  .stepper li.current .dot { background: var(--warn-bg); border-color: var(--warn-text); }
 
-  .diario-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .stepper { list-style: none; margin: 12px 0 0; padding: 0; }
+  .stepper li {
+    display: flex; align-items: flex-start; gap: 11px; font-size: 13px;
+    padding: 6px 0; color: var(--text-muted); border-left: 1px solid var(--border);
+    margin-left: 7px; padding-left: 15px; position: relative;
+  }
+  .stepper li:last-child { border-left: 1px solid transparent; }
+  .stepper .dot {
+    width: 14px; height: 14px; border-radius: 50%; flex: none; margin-top: 1px; margin-left: -22px;
+    border: 1.5px solid var(--border-strong); background: var(--card); display: flex; align-items: center;
+    justify-content: center; font-size: 9px; color: transparent; font-family: var(--font-mono);
+  }
+  .stepper li.done { color: var(--text-secondary); }
+  .stepper li.done .dot { background: var(--teal); border-color: var(--teal); color: var(--paper-raised); }
+  .stepper li.current { color: var(--text); font-weight: 600; }
+  .stepper li.current .dot { background: var(--gold); border-color: var(--gold); }
+
+  .diario-list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
   .diario-entry {
-    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12.5px;
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 11px; font-size: 12.5px;
+    background: color-mix(in srgb, var(--card) 96%, var(--ink) 4%);
   }
-  .diario-entry-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
-  .diario-date { color: var(--text-muted); font-size: 11.5px; }
-  .diario-who {
-    font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
-    background: var(--ok-bg); color: var(--ok-text);
-  }
-  .diario-who.jp { background: var(--warn-bg); color: var(--warn-text); }
-  .diario-nota { color: var(--text); line-height: 1.45; margin: 0; }
-  .diario-prazo { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
-  .diario-prazo.atrasado { color: var(--danger-text); font-weight: 600; }
+  .diario-entry-head { display: flex; align-items: center; gap: 9px; margin-bottom: 5px; flex-wrap: wrap; }
+  .diario-date { font-family: var(--font-mono); color: var(--text-muted); font-size: 11px; }
+  .diario-who { color: var(--teal); }
+  .diario-who.jp { color: var(--gold); }
+  .diario-nota { color: var(--text); line-height: 1.5; margin: 0; }
   .diario-empty { font-size: 12px; color: var(--text-muted); font-style: italic; }
-  .prazo-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; align-items: center; }
+
+  .prazo-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; align-items: center; }
   .prazo-chip {
-    font-size: 11px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border-strong);
-    color: var(--text-secondary);
+    font-family: var(--font-mono); font-size: 10.5px; padding: 2px 8px; border-radius: 3px;
+    border: 1px solid var(--border-strong); color: var(--text-secondary);
   }
   .prazo-chip.superseded { text-decoration: line-through; color: var(--text-muted); border-color: var(--border); }
   .prazo-chip.current { color: var(--text); border-color: var(--text-secondary); font-weight: 600; }
-  .prazo-chip.current.atrasado { color: var(--danger-text); border-color: var(--danger-text); background: var(--danger-bg); }
-  .reprogramado-badge {
-    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
-    background: var(--warn-bg); color: var(--warn-text);
-  }
-  .prazos-fieldset { margin-top: 8px; }
+  .prazo-chip.current.atrasado { color: var(--red); border-color: var(--red); background: var(--red-tint); }
+  .reprogramado-badge { color: var(--gold); }
+
+  .prazos-fieldset { margin-top: 10px; }
   .prazos-fieldset .diario-form-label { margin-bottom: 4px; }
   .prazos-inline { display: flex; gap: 8px; }
   .prazos-inline > div { flex: 1; }
-  .prazos-inline label { display: block; font-size: 10px; color: var(--text-muted); margin-bottom: 3px; }
+  .prazos-inline label { display: block; font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 3px; }
 
-  .diario-form { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
-  .diario-form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .diario-form { margin-top: 14px; border-top: 1px dashed var(--border-strong); padding-top: 11px; }
+  .diario-form-row { display: flex; gap: 8px; margin-bottom: 9px; }
   .diario-form select {
     font-family: var(--font); font-size: 12.5px; color: var(--text); background: var(--bg);
-    border: 1px solid var(--border-strong); border-radius: 8px; padding: 6px 8px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 6px 8px;
   }
   .diario-form input[type="date"] {
-    font-family: var(--font); font-size: 12.5px; color: var(--text); background: var(--bg);
-    border: 1px solid var(--border-strong); border-radius: 8px; padding: 6px 8px;
+    font-family: var(--font-mono); font-size: 12.5px; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 6px 8px;
   }
   .diario-form textarea { min-height: 44px; font-size: 12.5px; }
-  .diario-form-label { font-size: 10.5px; color: var(--text-muted); display: block; margin-bottom: 3px; }
-  .add-btn {
-    font-family: var(--font); font-size: 12.5px; font-weight: 500; color: var(--card);
-    background: var(--accent); border: none; border-radius: 8px; padding: 7px 14px; cursor: pointer;
-  }
-  .add-btn:active { transform: scale(0.98); }
-  .admin-row {
-    display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap;
-  }
-  .admin-state { font-size: 12px; color: var(--text-muted); }
-  .admin-btn {
-    font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--text-secondary);
-    background: transparent; border: 1px solid var(--border-strong); border-radius: 8px;
-    padding: 5px 12px; cursor: pointer;
-  }
-  .admin-btn.active { color: var(--danger-text); border-color: var(--danger-text); }
+  .diario-form-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 4px; }
+
   .del-entry-btn {
-    font-family: var(--font); font-size: 11px; color: var(--danger-text); background: transparent;
-    border: none; cursor: pointer; padding: 0 0 0 8px; text-decoration: underline;
+    font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--red); background: transparent; border: none; cursor: pointer; padding: 0 0 0 8px;
   }
+  .del-entry-btn:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>Painel de documentação — terrenos Carvalho</h1>
-    <p>Atualize a posição diária que o Kauã te passa. Cada card salva sozinho no seu navegador.</p>
+    <p class="eyebrow">Controle de processos · Carvalho Incorporadora</p>
+    <h1>Painel de documentação dos terrenos</h1>
+    <p>Atualize a posição diária que o Kauã te passa. Status e etapas salvam ao clicar em Salvar; o diário salva sozinho a cada registro.</p>
+    <hr>
     <div class="status-banner" id="global-status"></div>
     <div class="admin-row">
       <span class="admin-state" id="admin-state">Modo padrão: qualquer pessoa pode preencher e adicionar registros, ninguém pode apagar.</span>
