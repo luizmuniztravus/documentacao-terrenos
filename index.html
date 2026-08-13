@@ -53,7 +53,7 @@
   }
   .wrap { max-width: 920px; margin: 0 auto; }
   header { margin-bottom: 1.5rem; }
-  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; text-align: center; }
   header p { font-size: 13px; color: var(--text-secondary); margin: 0; }
   .status-banner {
     font-size: 12px; color: var(--text-muted); margin-top: 10px;
@@ -84,6 +84,11 @@
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;
     color: var(--text-muted); margin: 12px 0 4px; font-weight: 600;
   }
+  .field-label-prominent {
+    font-size: 12.5px; color: var(--accent); font-weight: 700; letter-spacing: 0.04em;
+    margin: 14px 0 6px; padding-bottom: 3px; border-bottom: 2px solid var(--accent);
+    display: inline-block;
+  }
   textarea, input[type="text"] {
     width: 100%; font-family: var(--font); font-size: 13.5px; color: var(--text);
     background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px;
@@ -92,13 +97,13 @@
   textarea { min-height: 54px; line-height: 1.45; }
   textarea:focus, input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   textarea.lockable {
-    border: none; background: transparent; padding: 0; resize: none;
-    cursor: default; color: var(--text); overflow: hidden;
+    background: var(--card); border: 1px solid var(--border); resize: none;
+    cursor: default; color: var(--text); box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
   }
   textarea.lockable:focus { outline: none; }
   textarea.lockable.unlocked {
-    border: 1px solid var(--border-strong); background: var(--bg); padding: 8px 10px;
-    resize: vertical; cursor: text; overflow: auto;
+    border: 1px solid var(--border-strong); background: var(--bg);
+    resize: vertical; cursor: text; box-shadow: none;
   }
   textarea.lockable.unlocked:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -227,7 +232,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Painel de documentação — terrenos Carvalho</h1>
+    <h1>Painel de documentação — Terrenos Carvalho</h1>
     <p>Atualize a posição diária que o Kauã te passa. Cada card salva sozinho no seu navegador.</p>
     <div class="status-banner" id="global-status"></div>
     <div class="admin-row">
@@ -374,10 +379,10 @@ function cardHTML(t) {
       </div>
       <p class="meta">${t.meta}</p>
 
-      <p class="field-label">Status / pendência atual</p>
+      <p class="field-label field-label-prominent">Status / pendência atual</p>
       <textarea data-field="status" class="lockable" readonly>${t.defaults.status}</textarea>
 
-      <p class="field-label">Quem está cobrando / próximo passo</p>
+      <p class="field-label field-label-prominent">Quem está cobrando / próximo passo</p>
       <textarea data-field="cobranca" class="lockable" readonly>${t.defaults.cobranca}</textarea>
 
       <div class="update-row">
