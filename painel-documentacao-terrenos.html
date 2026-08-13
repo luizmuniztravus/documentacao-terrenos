@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de documentação — terrenos Carvalho</title>
+<style>
+  :root {
+    --bg: #F7F6F2;
+    --card: #FFFFFF;
+    --border: #E3E0D8;
+    --border-strong: #C9C5B8;
+    --text: #2B2A26;
+    --text-secondary: #6B6A62;
+    --text-muted: #9B9A90;
+    --accent: #7A6A52;
+    --danger-bg: #FBEAE5;
+    --danger-text: #A3402A;
+    --danger-border: #E8B7A6;
+    --warn-bg: #FBF1DE;
+    --warn-text: #8A5B10;
+    --ok-bg: #E8EFE3;
+    --ok-text: #3E6B34;
+    --radius: 12px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1C1B18;
+      --card: #24231F;
+      --border: #38362F;
+      --border-strong: #4A4840;
+      --text: #EDECE6;
+      --text-secondary: #B0AEA3;
+      --text-muted: #7C7A70;
+      --accent: #C9B896;
+      --danger-bg: #3A2420;
+      --danger-text: #E8A08C;
+      --danger-border: #5C3128;
+      --warn-bg: #3A2E14;
+      --warn-text: #E8C070;
+      --ok-bg: #22301D;
+      --ok-text: #A0C890;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    padding: 2rem 1.25rem 4rem;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  header { margin-bottom: 1.5rem; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  header p { font-size: 13px; color: var(--text-secondary); margin: 0; }
+  .status-banner {
+    font-size: 12px; color: var(--text-muted); margin-top: 10px;
+    display: flex; align-items: center; gap: 6px; min-height: 16px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 14px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+  }
+  .card.priority { border: 2px solid var(--danger-text); }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+  .card-title { font-size: 16px; font-weight: 600; margin: 0; }
+  .meta { font-size: 12.5px; color: var(--text-secondary); margin: 2px 0 12px; }
+  .badge {
+    font-size: 11px; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+    background: var(--warn-bg); color: var(--warn-text); font-weight: 500;
+  }
+  .badge.danger { background: var(--danger-bg); color: var(--danger-text); }
+  .badge.info { background: var(--ok-bg); color: var(--ok-text); }
+  .field-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--text-muted); margin: 12px 0 4px; font-weight: 600;
+  }
+  textarea, input[type="text"] {
+    width: 100%; font-family: var(--font); font-size: 13.5px; color: var(--text);
+    background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px;
+    padding: 8px 10px; resize: vertical;
+  }
+  textarea { min-height: 54px; line-height: 1.45; }
+  textarea:focus, input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .update-row {
+    display: flex; align-items: center; gap: 8px; margin-top: 12px;
+    padding-top: 10px; border-top: 1px solid var(--border);
+  }
+  .update-row input[type="date"] {
+    font-family: var(--font); font-size: 13px; color: var(--text);
+    background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px;
+    padding: 6px 8px;
+  }
+  .save-btn {
+    margin-left: auto; font-family: var(--font); font-size: 12.5px; font-weight: 500;
+    color: var(--accent); background: transparent; border: 1px solid var(--border-strong);
+    border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  }
+  .save-btn:hover { background: var(--bg); }
+  .save-btn:active { transform: scale(0.98); }
+  .last-saved { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+  .etapas-toggle {
+    margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
+    font-family: var(--font); font-size: 12.5px; font-weight: 500; color: var(--accent);
+    background: transparent; border-left: none; border-right: none; border-bottom: none;
+    cursor: pointer; display: flex; align-items: center; gap: 6px; width: 100%;
+  }
+  .etapas-toggle .chev { transition: transform 0.15s ease; font-size: 11px; }
+  .etapas-toggle.open .chev { transform: rotate(90deg); }
+  .etapas-body { display: none; margin-top: 10px; }
+  .etapas-body.open { display: block; }
+  .etapas-edit-label {
+    font-size: 11px; color: var(--text-muted); margin: 6px 0 4px;
+  }
+  .etapas-row { display: flex; gap: 10px; align-items: flex-start; }
+  .etapas-row textarea { flex: 1; min-height: 90px; font-size: 12.5px; }
+  .etapa-atual-field { width: 90px; flex: none; }
+  .etapa-atual-field label { display: block; font-size: 10.5px; color: var(--text-muted); margin-bottom: 4px; }
+  .etapa-atual-field input {
+    width: 100%; font-family: var(--font); font-size: 13px; text-align: center;
+    background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px; padding: 6px;
+  }
+  .stepper { list-style: none; margin: 10px 0 0; padding: 0; }
+  .stepper li {
+    display: flex; align-items: flex-start; gap: 10px; font-size: 13px;
+    padding: 5px 0; color: var(--text-muted);
+  }
+  .stepper .dot {
+    width: 16px; height: 16px; border-radius: 50%; flex: none; margin-top: 1px;
+    border: 1.5px solid var(--border-strong); display: flex; align-items: center;
+    justify-content: center; font-size: 10px; color: transparent;
+  }
+  .stepper li.done { color: var(--text-secondary); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+  .stepper li.done .dot { background: var(--ok-bg); border-color: var(--ok-text); color: var(--ok-text); }
+  .stepper li.current { color: var(--text); font-weight: 600; }
+  .stepper li.current .dot { background: var(--warn-bg); border-color: var(--warn-text); }
+
+  .diario-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .diario-entry {
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12.5px;
+  }
+  .diario-entry-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+  .diario-date { color: var(--text-muted); font-size: 11.5px; }
+  .diario-who {
+    font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    background: var(--ok-bg); color: var(--ok-text);
+  }
+  .diario-who.jp { background: var(--warn-bg); color: var(--warn-text); }
+  .diario-nota { color: var(--text); line-height: 1.45; margin: 0; }
+  .diario-prazo { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+  .diario-prazo.atrasado { color: var(--danger-text); font-weight: 600; }
+  .diario-empty { font-size: 12px; color: var(--text-muted); font-style: italic; }
+  .prazo-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; align-items: center; }
+  .prazo-chip {
+    font-size: 11px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
+  }
+  .prazo-chip.superseded { text-decoration: line-through; color: var(--text-muted); border-color: var(--border); }
+  .prazo-chip.current { color: var(--text); border-color: var(--text-secondary); font-weight: 600; }
+  .prazo-chip.current.atrasado { color: var(--danger-text); border-color: var(--danger-text); background: var(--danger-bg); }
+  .reprogramado-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    background: var(--warn-bg); color: var(--warn-text);
+  }
+  .prazos-fieldset { margin-top: 8px; }
+  .prazos-fieldset .diario-form-label { margin-bottom: 4px; }
+  .prazos-inline { display: flex; gap: 8px; }
+  .prazos-inline > div { flex: 1; }
+  .prazos-inline label { display: block; font-size: 10px; color: var(--text-muted); margin-bottom: 3px; }
+
+  .diario-form { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .diario-form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .diario-form select {
+    font-family: var(--font); font-size: 12.5px; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border-strong); border-radius: 8px; padding: 6px 8px;
+  }
+  .diario-form input[type="date"] {
+    font-family: var(--font); font-size: 12.5px; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border-strong); border-radius: 8px; padding: 6px 8px;
+  }
+  .diario-form textarea { min-height: 44px; font-size: 12.5px; }
+  .diario-form-label { font-size: 10.5px; color: var(--text-muted); display: block; margin-bottom: 3px; }
+  .add-btn {
+    font-family: var(--font); font-size: 12.5px; font-weight: 500; color: var(--card);
+    background: var(--accent); border: none; border-radius: 8px; padding: 7px 14px; cursor: pointer;
+  }
+  .add-btn:active { transform: scale(0.98); }
+  .admin-row {
+    display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap;
+  }
+  .admin-state { font-size: 12px; color: var(--text-muted); }
+  .admin-btn {
+    font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--text-secondary);
+    background: transparent; border: 1px solid var(--border-strong); border-radius: 8px;
+    padding: 5px 12px; cursor: pointer;
+  }
+  .admin-btn.active { color: var(--danger-text); border-color: var(--danger-text); }
+  .del-entry-btn {
+    font-family: var(--font); font-size: 11px; color: var(--danger-text); background: transparent;
+    border: none; cursor: pointer; padding: 0 0 0 8px; text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Painel de documentação — terrenos Carvalho</h1>
+    <p>Atualize a posição diária que o Kauã te passa. Cada card salva sozinho no seu navegador.</p>
+    <div class="status-banner" id="global-status"></div>
+    <div class="admin-row">
+      <span class="admin-state" id="admin-state">Modo padrão: qualquer pessoa pode preencher e adicionar registros, ninguém pode apagar.</span>
+      <button class="admin-btn" id="admin-toggle" type="button">Entrar como administrador</button>
+    </div>
+  </header>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+const TERRENOS = [
+  {
+    id: "guajiru",
+    nome: "Guajiru",
+    meta: "São Miguel do Gostoso · Corretor: Neto Maroto · Proprietário: Sr. Grimaldo",
+    badge: { text: "Travado no vendedor", cls: "" },
+    priority: false,
+    defaults: {
+      status: "Pendente: Termo de Posse. O Neto disse que sairia fácil e não saiu. Além disso, a matrícula do imóvel está no nome da Prefeitura de São Miguel — precisa de uma anuência da prefeitura pra passar para o Sr. Grimaldo (proprietário do terreno), antes de passar para a Carvalho. Neto Maroto foi o corretor que vendeu/intermediou.",
+      cobranca: "Kauã está cobrando o Neto Maroto.",
+      etapas: [
+        "Termo de Posse",
+        "Anuência da prefeitura de São Miguel para passar a matrícula para o Sr. Grimaldo",
+        "Transferência da matrícula do Sr. Grimaldo para a Carvalho"
+      ],
+      etapaAtual: 1
+    }
+  },
+  {
+    id: "uhane",
+    nome: "Uhane",
+    meta: "São Miguel do Gostoso · Vendedor: Bruno Pacheco",
+    badge: { text: "Relação sensível", cls: "" },
+    priority: false,
+    defaults: {
+      status: "Pendente: IPTU do ano passado, não pago pelo vendedor.",
+      cobranca: "João Paulo (sócio, amigo do Bruno) assumiu a cobrança. Kauã foi afastado porque o Bruno ameaçou bloquear o número dele.",
+      etapas: ["Pagamento do IPTU em atraso"],
+      etapaAtual: 1
+    }
+  },
+  {
+    id: "jobiana",
+    nome: "Jobiana",
+    meta: "Touros · Proprietária/vendedora: Alda Macedo · Advogada: Jacobina",
+    badge: { text: "Negociando pagamento", cls: "info" },
+    priority: false,
+    defaults: {
+      status: "Vendedora quer o valor à vista no contrato.",
+      cobranca: "Orientação do Bruno Pacheco (advogado): 50% no contrato (R$ 20 mil) + 50% na escritura. Kauã está negociando. Jacobina é a advogada da proprietária Alda Macedo; Kauã já conseguiu o telefone dela.",
+      etapas: [
+        "Negociar forma de pagamento (50% contrato + 50% escritura)",
+        "Certidão de ônus do terreno — paga em 07/08, prazo de 5 dias, prevista para 14/08 (enviada em PDF)",
+        "Certidão de uso e ocupação — aguardando a proprietária decidir se vai negociar, para não fazer trabalho à toa (orientação do João)",
+        "Assinatura do contrato",
+        "Escritura"
+      ],
+      etapaAtual: 2,
+      diario: [
+        {
+          responsavel: "kaua",
+          data: "2026-08-07",
+          prazos: ["2026-08-14"],
+          nota: "Pago o requerimento da certidão de ônus do terreno. Prazo de emissão de 5 dias — deve sair em 14/08, enviada em PDF pelo cartório."
+        },
+        {
+          responsavel: "kaua",
+          data: "2026-08-13",
+          prazo: null,
+          nota: "Kauã vai ao cartório verificar se a certidão de ônus já saiu."
+        }
+      ]
+    }
+  },
+  {
+    id: "rua-dos-camaroes",
+    nome: "Rua dos Camarões",
+    meta: "São Miguel do Gostoso · Vendedor original: Neto Maroto · Vendedora atual: Prefeitura",
+    badge: { text: "Prioridade máxima", cls: "danger" },
+    priority: true,
+    defaults: {
+      status: "Etapa: desmembramento e remembramento dos lotes 15 e 16. Pendente com o Fernando (secretário da prefeitura), corrigindo as coordenadas do terreno e o nome do vendedor (erro de topografia). Por causa desse atraso, o alvará de construção está sendo pedido depois do início da obra, fora da ordem normal.",
+      cobranca: "Kauã está cobrando o Fernando. Casas já em fase final de construção — é o terreno mais urgente.",
+      etapas: [
+        "Correção da topografia dos lotes 15 e 16 (coordenadas e nome do vendedor) com o Fernando",
+        "Nova matrícula do imóvel",
+        "Alvará de construção — pedido com atraso, depois do início da obra, por causa do problema no desmembramento/remembramento (30 dias, meta 15 com JP)",
+        "Habite-se + certidão de característica — emitidos pela prefeitura, ficam efetivos assim que as casas estiverem prontas (30 dias, meta 15 com JP)",
+        "Averbação da construção no cartório (30 a 40 dias)",
+        "Venda das casas com segurança",
+        "Financiamento junto à Caixa Econômica"
+      ],
+      etapaAtual: 1,
+      diario: [
+        {
+          responsavel: "kaua",
+          data: "2026-08-12",
+          prazo: null,
+          nota: "Fernando (engenheiro da prefeitura, quem faz as liberações) atende das 09h às 13h. Pelo WhatsApp ele quase não responde — o que funciona é o Kauã ir pessoalmente e resolver sentado com ele."
+        },
+        {
+          responsavel: "kaua",
+          data: "2026-08-12",
+          prazo: null,
+          nota: "Kauã vai atualizar o memorial descritivo e o mapa com o nome da Carvalho e deixar pronto, mas sem protocolar. Orientação da tabeliã Isabelle (cartório de São Miguel) para não gastar dinheiro à toa, enquanto ela conversa com o Fernando pra ver se esse memorial/mapa é realmente necessário."
+        },
+        {
+          responsavel: "kaua",
+          data: "2026-08-13",
+          prazo: null,
+          nota: "A partir de amanhã: Kauã vai à prefeitura falar com o Fernando, e ao cartório falar com a Isabelle pra saber se ela já conversou com o Fernando."
+        }
+      ]
+    }
+  }
+];
+
+const grid = document.getElementById("grid");
+const globalStatus = document.getElementById("global-status");
+const STORAGE_KEY = "terrenos-tracker";
+const SHARED = true; // dados visíveis e editáveis por qualquer pessoa que abrir este link publicado
+const ADMIN_PIN = "carvalho2026"; // troque por uma senha sua; só quem souber consegue excluir registros
+let isAdmin = false;
+let saveTimer = null;
+
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function formatDatePt(iso) {
+  if (!iso) return "nunca";
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+function cardHTML(t) {
+  return `
+    <div class="card ${t.priority ? "priority" : ""}" data-id="${t.id}">
+      <div class="card-head">
+        <p class="card-title">${t.nome}</p>
+        <span class="badge ${t.badge.cls}">${t.badge.text}</span>
+      </div>
+      <p class="meta">${t.meta}</p>
+
+      <p class="field-label">Status / pendência atual</p>
+      <textarea data-field="status">${t.defaults.status}</textarea>
+
+      <p class="field-label">Quem está cobrando / próximo passo</p>
+      <textarea data-field="cobranca">${t.defaults.cobranca}</textarea>
+
+      <div class="update-row">
+        <label class="field-label" style="margin:0" for="date-${t.id}">Última atualização</label>
+        <input type="date" id="date-${t.id}" data-field="data" value="${todayISO()}">
+        <button class="save-btn" data-save="${t.id}">Salvar</button>
+      </div>
+      <p class="last-saved" data-lastsaved="${t.id}"></p>
+
+      <button class="etapas-toggle" data-toggle="${t.id}" type="button">
+        <span class="chev">›</span> Próximas etapas
+      </button>
+      <div class="etapas-body" data-etapasbody="${t.id}">
+        <ol class="stepper" data-stepper="${t.id}"></ol>
+        <p class="etapas-edit-label">Editar lista (uma etapa por linha) e marcar qual é a atual</p>
+        <div class="etapas-row">
+          <textarea data-field="etapas">${t.defaults.etapas.join("\n")}</textarea>
+          <div class="etapa-atual-field">
+            <label for="atual-${t.id}">Etapa atual (nº)</label>
+            <input type="text" inputmode="numeric" id="atual-${t.id}" data-field="etapaAtual" value="${t.defaults.etapaAtual}">
+          </div>
+        </div>
+      </div>
+
+      <button class="etapas-toggle" data-toggle="diario-${t.id}" type="button">
+        <span class="chev">›</span> Diário de acompanhamento
+      </button>
+      <div class="etapas-body" data-etapasbody="diario-${t.id}">
+        <ul class="diario-list" data-diariolist="${t.id}"></ul>
+
+        <div class="diario-form">
+          <div class="diario-form-row">
+            <div>
+              <label class="diario-form-label" for="resp-${t.id}">Responsável</label>
+              <select id="resp-${t.id}" data-diario-field="responsavel">
+                <option value="kaua">Kauã</option>
+                <option value="jp">João Paulo</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div>
+              <label class="diario-form-label" for="data-diario-${t.id}">Data</label>
+              <input type="date" id="data-diario-${t.id}" data-diario-field="data" value="${todayISO()}">
+            </div>
+          </div>
+          <div class="prazos-fieldset">
+            <label class="diario-form-label">Prazos prometidos (preencha mais de um se foi reprogramado)</label>
+            <div class="prazos-inline">
+              <div>
+                <label for="prazo1-${t.id}">Prazo 1</label>
+                <input type="date" id="prazo1-${t.id}" data-diario-field="prazo1">
+              </div>
+              <div>
+                <label for="prazo2-${t.id}">Prazo 2</label>
+                <input type="date" id="prazo2-${t.id}" data-diario-field="prazo2">
+              </div>
+              <div>
+                <label for="prazo3-${t.id}">Prazo 3</label>
+                <input type="date" id="prazo3-${t.id}" data-diario-field="prazo3">
+              </div>
+            </div>
+          </div>
+          <label class="diario-form-label" for="nota-${t.id}">O que foi dito / combinado</label>
+          <textarea id="nota-${t.id}" data-diario-field="nota" placeholder="Ex: falou com o Fernando, disse que resolve até sexta"></textarea>
+          <div style="margin-top:8px; text-align:right">
+            <button class="add-btn" data-adddiario="${t.id}" type="button">Adicionar registro</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function makeId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function ensureIds(entries) {
+  return (entries || []).map(e => (e.id ? e : { ...e, id: makeId() }));
+}
+
+function parseEtapas(raw) {
+  return raw.split("\n").map(s => s.trim()).filter(Boolean);
+}
+
+const diarioState = {};
+const RESP_LABEL = { kaua: "Kauã", jp: "João Paulo", outro: "Outro" };
+
+function renderDiario(card, id) {
+  const entries = (diarioState[id] || []).slice().sort((a, b) => (a.data < b.data ? 1 : -1));
+  const listEl = card.querySelector(`[data-diariolist="${id}"]`);
+  if (!entries.length) {
+    listEl.innerHTML = `<li class="diario-empty">Nenhum registro ainda.</li>`;
+    return;
+  }
+  const today = todayISO();
+  listEl.innerHTML = entries.map(e => {
+    const whoCls = e.responsavel === "jp" ? "jp" : "";
+    const whoLabel = RESP_LABEL[e.responsavel] || "Outro";
+    const prazos = Array.isArray(e.prazos) ? e.prazos.filter(Boolean) : (e.prazo ? [e.prazo] : []);
+    let prazoHTML = "";
+    if (prazos.length) {
+      const lastIdx = prazos.length - 1;
+      const lastAtrasado = prazos[lastIdx] < today;
+      const chips = prazos.map((p, i) => {
+        const isLast = i === lastIdx;
+        const cls = isLast ? `current ${lastAtrasado ? "atrasado" : ""}` : "superseded";
+        return `<span class="prazo-chip ${cls}">${formatDatePt(p)}</span>`;
+      }).join("");
+      const badge = prazos.length > 1 ? `<span class="reprogramado-badge">reprogramado ${prazos.length - 1}x</span>` : "";
+      prazoHTML = `<div class="prazo-chips">${chips}${badge}</div>`;
+    }
+    return `
+      <li class="diario-entry">
+        <div class="diario-entry-head">
+          <span class="diario-who ${whoCls}">${whoLabel}</span>
+          <span class="diario-date">${formatDatePt(e.data)}</span>
+          ${isAdmin ? `<button class="del-entry-btn" data-delentry="${id}" data-entryid="${e.id}" type="button">Excluir</button>` : ""}
+        </div>
+        <p class="diario-nota">${e.nota}</p>
+        ${prazoHTML}
+      </li>
+    `;
+  }).join("");
+}
+
+function renderStepper(card, etapas, etapaAtualRaw) {
+  const etapaAtual = parseInt(etapaAtualRaw, 10) || 0;
+  const stepperEl = card.querySelector("[data-stepper]");
+  stepperEl.innerHTML = etapas.map((label, i) => {
+    const n = i + 1;
+    const cls = n < etapaAtual ? "done" : (n === etapaAtual ? "current" : "");
+    const mark = n < etapaAtual ? "✓" : "";
+    return `<li class="${cls}"><span class="dot">${mark}</span><span>${label}</span></li>`;
+  }).join("");
+}
+
+grid.innerHTML = TERRENOS.map(cardHTML).join("");
+
+TERRENOS.forEach(t => {
+  const card = grid.querySelector(`[data-id="${t.id}"]`);
+  renderStepper(card, t.defaults.etapas, t.defaults.etapaAtual);
+  diarioState[t.id] = ensureIds(t.defaults.diario ? t.defaults.diario.slice() : []);
+  renderDiario(card, t.id);
+});
+
+async function loadAll() {
+  globalStatus.textContent = "Carregando dados salvos...";
+  try {
+    const result = await window.storage.get(STORAGE_KEY, SHARED);
+    if (result && result.value) {
+      const saved = JSON.parse(result.value);
+      TERRENOS.forEach(t => {
+        const s = saved[t.id];
+        if (!s) return;
+        const card = grid.querySelector(`[data-id="${t.id}"]`);
+        card.querySelector('[data-field="status"]').value = s.status ?? t.defaults.status;
+        card.querySelector('[data-field="cobranca"]').value = s.cobranca ?? t.defaults.cobranca;
+        card.querySelector('[data-field="data"]').value = s.data ?? todayISO();
+        const etapasText = s.etapas ?? t.defaults.etapas.join("\n");
+        const etapaAtual = s.etapaAtual ?? t.defaults.etapaAtual;
+        card.querySelector('[data-field="etapas"]').value = etapasText;
+        card.querySelector('[data-field="etapaAtual"]').value = etapaAtual;
+        renderStepper(card, parseEtapas(etapasText), etapaAtual);
+        diarioState[t.id] = ensureIds(Array.isArray(s.diario) ? s.diario : (t.defaults.diario ? t.defaults.diario.slice() : []));
+        renderDiario(card, t.id);
+        const lastSavedEl = card.querySelector(`[data-lastsaved="${t.id}"]`);
+        if (s.data) lastSavedEl.textContent = `Atualizado em ${formatDatePt(s.data)}`;
+      });
+    }
+    globalStatus.textContent = "";
+  } catch (err) {
+    globalStatus.textContent = "Nenhum dado salvo ainda — preencha e clique em salvar.";
+  }
+}
+
+async function saveCard(id) {
+  const card = grid.querySelector(`[data-id="${id}"]`);
+  const status = card.querySelector('[data-field="status"]').value;
+  const cobranca = card.querySelector('[data-field="cobranca"]').value;
+  const data = card.querySelector('[data-field="data"]').value;
+  const etapasText = card.querySelector('[data-field="etapas"]').value;
+  const etapaAtual = card.querySelector('[data-field="etapaAtual"]').value;
+
+  try {
+    const existing = await window.storage.get(STORAGE_KEY, SHARED).catch(() => null);
+    const all = existing && existing.value ? JSON.parse(existing.value) : {};
+    all[id] = { status, cobranca, data, etapas: etapasText, etapaAtual, diario: diarioState[id] || [] };
+    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(all), SHARED);
+    renderStepper(card, parseEtapas(etapasText), etapaAtual);
+    const lastSavedEl = card.querySelector(`[data-lastsaved="${id}"]`);
+    if (result) {
+      lastSavedEl.textContent = `Atualizado em ${formatDatePt(data)}`;
+      globalStatus.textContent = `Salvo: ${card.querySelector(".card-title").textContent}`;
+    } else {
+      globalStatus.textContent = "Não foi possível salvar. Tente novamente.";
+    }
+  } catch (err) {
+    globalStatus.textContent = "Não foi possível salvar. Tente novamente.";
+  }
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 3000);
+}
+
+async function addDiarioEntry(id) {
+  const card = grid.querySelector(`[data-id="${id}"]`);
+  const responsavel = card.querySelector('[data-diario-field="responsavel"]').value;
+  const data = card.querySelector('[data-diario-field="data"]').value || todayISO();
+  const prazo1 = card.querySelector('[data-diario-field="prazo1"]').value;
+  const prazo2 = card.querySelector('[data-diario-field="prazo2"]').value;
+  const prazo3 = card.querySelector('[data-diario-field="prazo3"]').value;
+  const prazos = [prazo1, prazo2, prazo3].filter(Boolean);
+  const notaEl = card.querySelector('[data-diario-field="nota"]');
+  const nota = notaEl.value.trim();
+
+  if (!nota) {
+    globalStatus.textContent = "Escreva o que foi combinado antes de adicionar.";
+    return;
+  }
+
+  const entry = { id: makeId(), responsavel, data, prazos, nota };
+  diarioState[id] = diarioState[id] || [];
+  diarioState[id].push(entry);
+  renderDiario(card, id);
+  notaEl.value = "";
+  card.querySelector('[data-diario-field="prazo1"]').value = "";
+  card.querySelector('[data-diario-field="prazo2"]').value = "";
+  card.querySelector('[data-diario-field="prazo3"]').value = "";
+
+  try {
+    const existing = await window.storage.get(STORAGE_KEY, SHARED).catch(() => null);
+    const all = existing && existing.value ? JSON.parse(existing.value) : {};
+    all[id] = all[id] || {};
+    all[id].diario = diarioState[id];
+    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(all), SHARED);
+    globalStatus.textContent = result ? `Registro adicionado: ${card.querySelector(".card-title").textContent}` : "Não foi possível salvar o registro.";
+  } catch (err) {
+    globalStatus.textContent = "Não foi possível salvar o registro.";
+  }
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 3000);
+}
+
+async function deleteDiarioEntry(id, entryId) {
+  const card = grid.querySelector(`[data-id="${id}"]`);
+  diarioState[id] = (diarioState[id] || []).filter(e => e.id !== entryId);
+  renderDiario(card, id);
+  try {
+    const existing = await window.storage.get(STORAGE_KEY, SHARED).catch(() => null);
+    const all = existing && existing.value ? JSON.parse(existing.value) : {};
+    all[id] = all[id] || {};
+    all[id].diario = diarioState[id];
+    await window.storage.set(STORAGE_KEY, JSON.stringify(all), SHARED);
+    globalStatus.textContent = "Registro excluído.";
+  } catch (err) {
+    globalStatus.textContent = "Não foi possível excluir. Tente novamente.";
+  }
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 3000);
+}
+
+const adminToggleBtn = document.getElementById("admin-toggle");
+const adminStateEl = document.getElementById("admin-state");
+
+adminToggleBtn.addEventListener("click", () => {
+  if (isAdmin) {
+    isAdmin = false;
+    adminToggleBtn.textContent = "Entrar como administrador";
+    adminToggleBtn.classList.remove("active");
+    adminStateEl.textContent = "Modo padrão: qualquer pessoa pode preencher e adicionar registros, ninguém pode apagar.";
+  } else {
+    const pin = window.prompt("PIN de administrador:");
+    if (pin === null) return;
+    if (pin === ADMIN_PIN) {
+      isAdmin = true;
+      adminToggleBtn.textContent = "Sair do modo administrador";
+      adminToggleBtn.classList.add("active");
+      adminStateEl.textContent = "Modo administrador ativo: você pode excluir registros do diário.";
+    } else {
+      globalStatus.textContent = "PIN incorreto.";
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 3000);
+      return;
+    }
+  }
+  TERRENOS.forEach(t => {
+    const card = grid.querySelector(`[data-id="${t.id}"]`);
+    renderDiario(card, t.id);
+  });
+});
+
+grid.addEventListener("click", (e) => {
+  const saveBtn = e.target.closest("[data-save]");
+  if (saveBtn) { saveCard(saveBtn.getAttribute("data-save")); return; }
+
+  const toggleBtn = e.target.closest("[data-toggle]");
+  if (toggleBtn) {
+    const id = toggleBtn.getAttribute("data-toggle");
+    const body = grid.querySelector(`[data-etapasbody="${id}"]`);
+    toggleBtn.classList.toggle("open");
+    body.classList.toggle("open");
+    return;
+  }
+
+  const addBtn = e.target.closest("[data-adddiario]");
+  if (addBtn) { addDiarioEntry(addBtn.getAttribute("data-adddiario")); return; }
+
+  const delBtn = e.target.closest("[data-delentry]");
+  if (delBtn) deleteDiarioEntry(delBtn.getAttribute("data-delentry"), delBtn.getAttribute("data-entryid"));
+});
+
+loadAll();
+</script>
+</body>
+</html>
