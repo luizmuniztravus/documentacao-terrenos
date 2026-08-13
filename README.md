@@ -18,7 +18,7 @@ Painel de acompanhamento da documentação dos terrenos da incorporadora Carvalh
 
 ## Como usar
 
-1. Abra `painel-documentacao-terrenos.html` no navegador (ou pelo link do GitHub Pages, se estiver ativado neste repositório).
+1. Abra `index.html` no navegador (ou pelo link do GitHub Pages, se estiver ativado neste repositório).
 2. Edite os campos de status, próximas etapas e adicione registros no diário conforme a posição do dia.
 3. Clique em **Salvar** em cada card para gravar as mudanças de status/etapas. Registros do diário salvam sozinhos ao clicar em **Adicionar registro**.
 
@@ -39,4 +39,4 @@ Para o Kauã (ou qualquer pessoa fora deste repositório) acessar o painel pelo 
 `Settings → Pages → Branch: main → Save`
 
 O link fica em:
-`https://luizmuniztravus.github.io/documentacao-terrenos/painel-documentacao-terrenos.html`
+`https://luizmuniztravus.github.io/documentacao-terrenos/`
