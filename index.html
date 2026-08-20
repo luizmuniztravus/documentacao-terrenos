@@ -355,8 +355,25 @@ const TERRENOS = [
 const grid = document.getElementById("grid");
 const globalStatus = document.getElementById("global-status");
 const STORAGE_KEY = "terrenos-tracker";
-const SHARED = true; // dados visíveis e editáveis por qualquer pessoa que abrir este link publicado
-const ADMIN_PIN = "carvalho2026"; // troque por uma senha sua; só quem souber consegue excluir registros
+const API_URL = "data.php"; // backend em PHP que grava os dados no servidor (terrenos-data.json)
+const ADMIN_PIN = "carvalho2026"; // troque por uma senha sua; só quem souber consegue editar/excluir registros
+
+async function apiGet() {
+  const res = await fetch(API_URL, { cache: "no-store" });
+  if (!res.ok) throw new Error("Falha ao carregar dados do servidor.");
+  const text = await res.text();
+  return { key: STORAGE_KEY, value: text };
+}
+
+async function apiSet(valueString) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: valueString
+  });
+  if (!res.ok) throw new Error("Falha ao salvar dados no servidor.");
+  return { key: STORAGE_KEY, value: valueString };
+}
 let isAdmin = false;
 let saveTimer = null;
 
@@ -592,7 +609,7 @@ applyLockState();
 async function loadAll() {
   globalStatus.textContent = "Carregando dados salvos...";
   try {
-    const result = await window.storage.get(STORAGE_KEY, SHARED);
+    const result = await apiGet();
     if (result && result.value) {
       const saved = JSON.parse(result.value);
       TERRENOS.forEach(t => {
@@ -629,10 +646,10 @@ async function saveCard(id) {
   const etapaAtual = card.querySelector('[data-field="etapaAtual"]').value;
 
   try {
-    const existing = await window.storage.get(STORAGE_KEY, SHARED).catch(() => null);
+    const existing = await apiGet().catch(() => null);
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
     all[id] = { status, cobranca, data, etapas: etapasText, etapaAtual, diario: diarioState[id] || [] };
-    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(all), SHARED);
+    const result = await apiSet(JSON.stringify(all));
     renderStepper(card, parseEtapas(etapasText), etapaAtual);
     const lastSavedEl = card.querySelector(`[data-lastsaved="${id}"]`);
     if (result) {
@@ -674,11 +691,11 @@ async function addDiarioEntry(id) {
   card.querySelector('[data-diario-field="prazo3"]').value = "";
 
   try {
-    const existing = await window.storage.get(STORAGE_KEY, SHARED).catch(() => null);
+    const existing = await apiGet().catch(() => null);
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
     all[id] = all[id] || {};
     all[id].diario = diarioState[id];
-    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(all), SHARED);
+    const result = await apiSet(JSON.stringify(all));
     globalStatus.textContent = result ? `Registro adicionado: ${card.querySelector(".card-title").textContent}` : "Não foi possível salvar o registro.";
   } catch (err) {
     globalStatus.textContent = "Não foi possível salvar o registro.";
@@ -729,11 +746,11 @@ async function saveDiarioEdit(id, entryId) {
   renderDiario(card, id);
 
   try {
-    const existing = await window.storage.get(STORAGE_KEY, SHARED).catch(() => null);
+    const existing = await apiGet().catch(() => null);
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
     all[id] = all[id] || {};
     all[id].diario = diarioState[id];
-    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(all), SHARED);
+    const result = await apiSet(JSON.stringify(all));
     globalStatus.textContent = result ? "Registro editado." : "Não foi possível salvar a edição.";
   } catch (err) {
     globalStatus.textContent = "Não foi possível salvar a edição.";
@@ -747,11 +764,11 @@ async function deleteDiarioEntry(id, entryId) {
   diarioState[id] = (diarioState[id] || []).filter(e => e.id !== entryId);
   renderDiario(card, id);
   try {
-    const existing = await window.storage.get(STORAGE_KEY, SHARED).catch(() => null);
+    const existing = await apiGet().catch(() => null);
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
     all[id] = all[id] || {};
     all[id].diario = diarioState[id];
-    await window.storage.set(STORAGE_KEY, JSON.stringify(all), SHARED);
+    await apiSet(JSON.stringify(all));
     globalStatus.textContent = "Registro excluído.";
   } catch (err) {
     globalStatus.textContent = "Não foi possível excluir. Tente novamente.";

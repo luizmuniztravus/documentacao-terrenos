@@ -22,7 +22,13 @@ Painel de acompanhamento da documentação dos terrenos da incorporadora Carvalh
 2. Edite os campos de status, próximas etapas e adicione registros no diário conforme a posição do dia.
 3. Clique em **Salvar** em cada card para gravar as mudanças de status/etapas. Registros do diário salvam sozinhos ao clicar em **Adicionar registro**.
 
-Os dados ficam salvos de forma **compartilhada**: qualquer pessoa que abrir a página vê e pode preencher as mesmas informações — não é uma cópia local de cada um.
+Os dados ficam salvos em um arquivo no próprio servidor (`terrenos-data.json`, gerado automaticamente), através do script `data.php`. Isso significa que o painel **precisa ser hospedado em um servidor com PHP** (como o cPanel já usado neste projeto) — abrir o `index.html` direto do computador, sem passar por um servidor PHP, faz o salvamento falhar.
+
+Qualquer pessoa que abrir a página vê e pode preencher as mesmas informações — não é uma cópia separada por pessoa ou navegador.
+
+### Requisito de permissão no servidor
+
+A pasta onde o `index.html` e o `data.php` estão precisa permitir que o PHP crie e edite arquivos nela (para gerar o `terrenos-data.json`). Se o salvamento não funcionar, o primeiro lugar a checar é a permissão de escrita da pasta no cPanel.
 
 ## Modo administrador
 
