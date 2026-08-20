@@ -172,6 +172,7 @@
     background: var(--ok-bg); color: var(--ok-text);
   }
   .diario-who.jp { background: var(--warn-bg); color: var(--warn-text); }
+  .diario-who.luiz { background: var(--danger-bg); color: var(--danger-text); }
   .diario-nota { color: var(--text); line-height: 1.45; margin: 0; }
   .diario-prazo { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
   .diario-prazo.atrasado { color: var(--danger-text); font-weight: 600; }
@@ -437,6 +438,7 @@ function cardHTML(t) {
               <select id="resp-${t.id}" data-diario-field="responsavel">
                 <option value="kaua">Kauã</option>
                 <option value="jp">João Paulo</option>
+                <option value="luiz">Luiz Filippe</option>
                 <option value="outro">Outro</option>
               </select>
             </div>
@@ -487,7 +489,7 @@ function parseEtapas(raw) {
 
 const diarioState = {};
 const editingState = {};
-const RESP_LABEL = { kaua: "Kauã", jp: "João Paulo", outro: "Outro" };
+const RESP_LABEL = { kaua: "Kauã", jp: "João Paulo", luiz: "Luiz Filippe", outro: "Outro" };
 
 function escapeAttr(str) {
   return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -512,6 +514,7 @@ function renderDiario(card, id) {
               <select data-edit-field="responsavel">
                 <option value="kaua" ${e.responsavel === "kaua" ? "selected" : ""}>Kauã</option>
                 <option value="jp" ${e.responsavel === "jp" ? "selected" : ""}>João Paulo</option>
+                <option value="luiz" ${e.responsavel === "luiz" ? "selected" : ""}>Luiz Filippe</option>
                 <option value="outro" ${e.responsavel === "outro" ? "selected" : ""}>Outro</option>
               </select>
             </div>
@@ -538,7 +541,7 @@ function renderDiario(card, id) {
       `;
     }
 
-    const whoCls = e.responsavel === "jp" ? "jp" : "";
+    const whoCls = e.responsavel === "jp" ? "jp" : (e.responsavel === "luiz" ? "luiz" : "");
     const whoLabel = RESP_LABEL[e.responsavel] || "Outro";
     const prazos = Array.isArray(e.prazos) ? e.prazos.filter(Boolean) : (e.prazo ? [e.prazo] : []);
     let prazoHTML = "";
