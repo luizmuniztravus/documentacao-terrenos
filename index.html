@@ -570,7 +570,7 @@ function cardHTML(t) {
           <div class="avatar">${initials(t.nome)}</div>
           <p class="card-title">${t.nome}</p>
         </div>
-        <span class="badge ${t.badge.cls}">${t.badge.text}</span>
+        <span class="badge ${t.badge.cls}" data-badge="${t.id}">${t.badge.text}</span>
       </div>
       <p class="meta">${t.meta}</p>
 
@@ -591,9 +591,9 @@ function cardHTML(t) {
             </div>
           </div>
 
-          <div class="detail-flag ${t.badge.cls}">
+          <div class="detail-flag ${t.badge.cls}" data-badgedetail="${t.id}">
             <span class="detail-flag-dot"></span>
-            ${t.badge.text}
+            <span data-badgedetailtext="${t.id}">${t.badge.text}</span>
           </div>
 
         <p class="field-label field-label-prominent">Status / pendência atual</p>
@@ -711,6 +711,27 @@ function renderNegStatus(card, id) {
   row.innerHTML = `
     <select class="neg-select ${status}" data-negselect="${id}" aria-label="Situação da negociação">${opts}</select>
   `;
+
+  syncBadge(card, id, status);
+}
+
+function syncBadge(card, id, status) {
+  const t = TERRENOS.find(x => x.id === id);
+  if (!t) return;
+  let badge;
+  if (status === "finalizado") badge = { text: "Finalizado", cls: "info" };
+  else if (status === "encerrada") badge = { text: "Encerrado", cls: "danger" };
+  else badge = t.badge;
+
+  const compact = card.querySelector(`[data-badge="${id}"]`);
+  if (compact) { compact.textContent = badge.text; compact.className = `badge ${badge.cls}`; }
+
+  const detailBox = card.querySelector(`[data-badgedetail="${id}"]`);
+  const detailText = card.querySelector(`[data-badgedetailtext="${id}"]`);
+  if (detailBox && detailText) {
+    detailBox.className = `detail-flag ${badge.cls}`;
+    detailText.textContent = badge.text;
+  }
 }
 
 async function setNegStatus(id, value) {
