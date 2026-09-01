@@ -4,257 +4,288 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel de documentação — terrenos Carvalho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #F7F6F2;
-    --card: #FFFFFF;
-    --border: #E3E0D8;
-    --border-strong: #C9C5B8;
-    --text: #2B2A26;
-    --text-secondary: #6B6A62;
-    --text-muted: #9B9A90;
-    --accent: #7A6A52;
-    --danger-bg: #FBEAE5;
-    --danger-text: #A3402A;
-    --danger-border: #E8B7A6;
-    --warn-bg: #FBF1DE;
-    --warn-text: #8A5B10;
-    --ok-bg: #E8EFE3;
-    --ok-text: #3E6B34;
-    --radius: 12px;
-    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1C1B18;
-      --card: #24231F;
-      --border: #38362F;
-      --border-strong: #4A4840;
-      --text: #EDECE6;
-      --text-secondary: #B0AEA3;
-      --text-muted: #7C7A70;
-      --accent: #C9B896;
-      --danger-bg: #3A2420;
-      --danger-text: #E8A08C;
-      --danger-border: #5C3128;
-      --warn-bg: #3A2E14;
-      --warn-text: #E8C070;
-      --ok-bg: #22301D;
-      --ok-text: #A0C890;
-    }
+    --bg-0: #0A0E1A;
+    --bg-1: #0F1424;
+    --card: rgba(255, 255, 255, 0.045);
+    --card-solid: #131A2E;
+    --border: rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text: #EAEDF7;
+    --text-secondary: #9CA3C0;
+    --text-muted: #6C7395;
+    --accent: #7C9CFF;
+    --accent-2: #B98CF2;
+    --danger-bg: rgba(255, 107, 107, 0.14);
+    --danger-text: #FF9494;
+    --warn-bg: rgba(251, 191, 100, 0.14);
+    --warn-text: #FBC876;
+    --ok-bg: rgba(52, 216, 176, 0.14);
+    --ok-text: #5CE0BB;
+    --radius: 16px;
+    --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: var(--bg);
+    min-height: 100vh;
+    background:
+      radial-gradient(1100px 560px at 12% -8%, rgba(124, 156, 255, 0.16), transparent 60%),
+      radial-gradient(900px 500px at 105% 8%, rgba(185, 140, 242, 0.14), transparent 55%),
+      var(--bg-0);
+    background-attachment: fixed;
     color: var(--text);
     font-family: var(--font);
-    padding: 2rem 1.25rem 4rem;
+    padding: 2.5rem 1.25rem 4rem;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 920px; margin: 0 auto; }
-  header { margin-bottom: 1.5rem; }
-  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; text-align: center; }
-  header p { font-size: 13px; color: var(--text-secondary); margin: 0; }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+  header { margin-bottom: 2rem; }
+  h1 {
+    font-size: 26px; font-weight: 800; margin: 0 0 6px; text-align: center;
+    letter-spacing: -0.02em;
+    background: linear-gradient(90deg, #FFFFFF, #B9C4E8);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  header p { font-size: 13.5px; color: var(--text-secondary); margin: 0; text-align: center; }
   .status-banner {
-    font-size: 12px; color: var(--text-muted); margin-top: 10px;
-    display: flex; align-items: center; gap: 6px; min-height: 16px;
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); margin-top: 14px;
+    display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 16px;
   }
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
   }
   .card {
-    background: var(--card);
+    position: relative;
+    background:
+      linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015)),
+      var(--card-solid);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 1.1rem 1.25rem;
+    padding: 1.3rem 1.4rem;
+    box-shadow: 0 20px 40px -24px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.02) inset;
+    overflow: hidden;
   }
-  .card.priority { border: 2px solid var(--danger-text); }
-  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
-  .card-title { font-size: 16px; font-weight: 600; margin: 0; }
-  .meta { font-size: 12.5px; color: var(--text-secondary); margin: 2px 0 12px; }
+  .card::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+    background: linear-gradient(90deg, var(--card-accent, var(--accent)), transparent 85%);
+    opacity: 0.9;
+  }
+  .card.priority {
+    border-color: rgba(255, 107, 107, 0.35);
+    box-shadow: 0 20px 44px -20px rgba(255, 90, 90, 0.28), 0 0 0 1px rgba(255,255,255,0.02) inset;
+  }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 2px; }
+  .card-heading { display: flex; align-items: center; gap: 11px; }
+  .avatar {
+    width: 38px; height: 38px; border-radius: 11px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font); font-weight: 700; font-size: 14px; color: #fff;
+    background: linear-gradient(135deg, var(--card-accent, var(--accent)), var(--accent-2));
+    box-shadow: 0 6px 16px -6px var(--card-accent, var(--accent));
+  }
+  .card-title { font-size: 16.5px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  .meta { font-size: 12px; color: var(--text-secondary); margin: 2px 0 12px; padding-left: 49px; }
   .badge {
-    font-size: 11px; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
-    background: var(--warn-bg); color: var(--warn-text); font-weight: 500;
+    font-size: 10.5px; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+    background: var(--warn-bg); color: var(--warn-text); font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.06);
   }
   .badge.danger { background: var(--danger-bg); color: var(--danger-text); }
   .badge.info { background: var(--ok-bg); color: var(--ok-text); }
   .field-label {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;
-    color: var(--text-muted); margin: 12px 0 4px; font-weight: 600;
+    font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-muted); margin: 14px 0 5px; font-weight: 500;
   }
   .field-label-prominent {
-    font-size: 12.5px; color: var(--accent); font-weight: 700; letter-spacing: 0.04em;
-    margin: 14px 0 6px; padding-bottom: 3px; border-bottom: 2px solid var(--accent);
-    display: inline-block;
+    font-size: 11.5px; color: var(--accent); font-weight: 700; letter-spacing: 0.05em;
+    margin: 16px 0 6px; padding-bottom: 4px; border-bottom: 2px solid rgba(124,156,255,0.35);
+    display: inline-block; text-transform: uppercase; font-family: var(--font-mono);
   }
   textarea, input[type="text"] {
-    width: 100%; font-family: var(--font); font-size: 13.5px; color: var(--text);
-    background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px;
-    padding: 8px 10px; resize: vertical;
+    width: 100%; font-family: var(--font); font-size: 13px; color: var(--text);
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px;
+    padding: 9px 11px; resize: vertical;
   }
-  textarea { min-height: 54px; line-height: 1.45; }
+  textarea { min-height: 54px; line-height: 1.5; }
   textarea:focus, input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   textarea.lockable {
-    background: var(--card); border: 1px solid var(--border); resize: none;
-    cursor: default; color: var(--text); box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+    background: rgba(255,255,255,0.025); border: 1px solid var(--border); resize: none;
+    cursor: default; color: var(--text-secondary);
   }
   textarea.lockable:focus { outline: none; }
   textarea.lockable.unlocked {
-    border: 1px solid var(--border-strong); background: var(--bg);
-    resize: vertical; cursor: text; box-shadow: none;
+    border: 1px solid var(--accent); background: rgba(124,156,255,0.06);
+    resize: vertical; cursor: text; color: var(--text);
   }
   textarea.lockable.unlocked:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .update-row {
-    display: flex; align-items: center; gap: 8px; margin-top: 12px;
-    padding-top: 10px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px; margin-top: 14px;
+    padding-top: 12px; border-top: 1px dashed var(--border);
   }
   .update-row input[type="date"] {
-    font-family: var(--font); font-size: 13px; color: var(--text);
-    background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px;
-    padding: 6px 8px;
+    font-family: var(--font-mono); font-size: 12.5px; color: var(--text);
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 8px; color-scheme: dark;
   }
   .save-btn {
-    margin-left: auto; font-family: var(--font); font-size: 12.5px; font-weight: 500;
-    color: var(--accent); background: transparent; border: 1px solid var(--border-strong);
-    border-radius: 8px; padding: 6px 12px; cursor: pointer;
+    margin-left: auto; font-family: var(--font); font-size: 12.5px; font-weight: 600;
+    color: var(--accent); background: rgba(124,156,255,0.1); border: 1px solid rgba(124,156,255,0.3);
+    border-radius: 9px; padding: 7px 14px; cursor: pointer;
   }
-  .save-btn:hover { background: var(--bg); }
+  .save-btn:hover { background: rgba(124,156,255,0.18); }
   .save-btn:active { transform: scale(0.98); }
-  .last-saved { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+  .last-saved { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); margin-top: 7px; }
 
   .etapas-toggle {
-    margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
-    font-family: var(--font); font-size: 12.5px; font-weight: 500; color: var(--accent);
+    margin-top: 16px; padding-top: 13px; border-top: 1px dashed var(--border);
+    font-family: var(--font); font-size: 12.5px; font-weight: 600; color: var(--accent-2);
     background: transparent; border-left: none; border-right: none; border-bottom: none;
-    cursor: pointer; display: flex; align-items: center; gap: 6px; width: 100%;
+    border-top: 1px dashed var(--border);
+    cursor: pointer; display: flex; align-items: center; gap: 7px; width: 100%;
   }
   .etapas-toggle .chev { transition: transform 0.15s ease; font-size: 11px; }
   .etapas-toggle.open .chev { transform: rotate(90deg); }
-  .etapas-body { display: none; margin-top: 10px; }
+  .etapas-body { display: none; margin-top: 12px; }
   .etapas-body.open { display: block; }
   .etapas-edit-label {
-    font-size: 11px; color: var(--text-muted); margin: 6px 0 4px;
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); margin: 8px 0 5px;
   }
   .etapas-row { display: flex; gap: 10px; align-items: flex-start; }
   .etapas-row textarea { flex: 1; min-height: 90px; font-size: 12.5px; }
   .etapa-atual-field { width: 90px; flex: none; }
-  .etapa-atual-field label { display: block; font-size: 10.5px; color: var(--text-muted); margin-bottom: 4px; }
+  .etapa-atual-field label { display: block; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px; }
   .etapa-atual-field input {
-    width: 100%; font-family: var(--font); font-size: 13px; text-align: center;
-    background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px; padding: 6px;
+    width: 100%; font-family: var(--font-mono); font-size: 13px; text-align: center; color: var(--text);
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 6px;
   }
-  .stepper { list-style: none; margin: 10px 0 0; padding: 0; }
+  .stepper { list-style: none; margin: 12px 0 0; padding: 0; }
   .stepper li {
-    display: flex; align-items: flex-start; gap: 10px; font-size: 13px;
+    display: flex; align-items: flex-start; gap: 11px; font-size: 12.5px;
     padding: 5px 0; color: var(--text-muted);
   }
   .stepper .dot {
-    width: 16px; height: 16px; border-radius: 50%; flex: none; margin-top: 1px;
+    width: 15px; height: 15px; border-radius: 50%; flex: none; margin-top: 1px;
     border: 1.5px solid var(--border-strong); display: flex; align-items: center;
-    justify-content: center; font-size: 10px; color: transparent;
+    justify-content: center; font-size: 9px; color: transparent;
   }
   .stepper li.done { color: var(--text-secondary); text-decoration: line-through; text-decoration-color: var(--border-strong); }
-  .stepper li.done .dot { background: var(--ok-bg); border-color: var(--ok-text); color: var(--ok-text); }
-  .stepper li.current { color: var(--text); font-weight: 600; }
-  .stepper li.current .dot { background: var(--warn-bg); border-color: var(--warn-text); }
+  .stepper li.done .dot { background: var(--ok-text); border-color: var(--ok-text); color: #06231A; }
+  .stepper li.current { color: var(--text); font-weight: 700; }
+  .stepper li.current .dot { background: var(--warn-text); border-color: var(--warn-text); }
 
-  .diario-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  /* Timeline (diário de acompanhamento) */
+  .diario-list { list-style: none; margin: 14px 0 0; padding: 0; }
   .diario-entry {
-    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12.5px;
+    position: relative; margin-left: 6px; padding: 11px 13px 11px 22px; margin-bottom: 4px;
+    border-left: 2px solid var(--border); font-size: 12.5px;
   }
-  .diario-entry-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
-  .diario-date { color: var(--text-muted); font-size: 11.5px; }
+  .diario-entry:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .diario-entry::before {
+    content: ""; position: absolute; left: -7px; top: 15px; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--dot-color, var(--accent));
+    box-shadow: 0 0 0 4px var(--bg-1), 0 0 10px 1px var(--dot-color, var(--accent));
+  }
+  .diario-entry-body {
+    background: rgba(255,255,255,0.035); border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .diario-entry-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
+  .diario-date { font-family: var(--font-mono); color: var(--text-muted); font-size: 10.5px; }
   .diario-who {
-    font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
-    background: var(--ok-bg); color: var(--ok-text);
+    font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px;
+    background: var(--ok-bg); color: var(--ok-text); letter-spacing: 0.02em;
   }
   .diario-who.jp { background: var(--warn-bg); color: var(--warn-text); }
   .diario-who.luiz { background: var(--danger-bg); color: var(--danger-text); }
-  .diario-nota { color: var(--text); line-height: 1.45; margin: 0; }
-  .diario-prazo { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
-  .diario-prazo.atrasado { color: var(--danger-text); font-weight: 600; }
-  .diario-empty { font-size: 12px; color: var(--text-muted); font-style: italic; }
-  .prazo-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; align-items: center; }
+  .diario-nota { color: var(--text-secondary); line-height: 1.5; margin: 0; }
+  .diario-empty { font-size: 12px; color: var(--text-muted); font-style: italic; padding-left: 6px; }
+  .prazo-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
   .prazo-chip {
-    font-size: 11px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border-strong);
-    color: var(--text-secondary);
+    font-family: var(--font-mono); font-size: 10.5px; padding: 2px 8px; border-radius: 20px;
+    border: 1px solid var(--border-strong); color: var(--text-secondary);
   }
   .prazo-chip.superseded { text-decoration: line-through; color: var(--text-muted); border-color: var(--border); }
   .prazo-chip.current { color: var(--text); border-color: var(--text-secondary); font-weight: 600; }
   .prazo-chip.current.atrasado { color: var(--danger-text); border-color: var(--danger-text); background: var(--danger-bg); }
   .reprogramado-badge {
-    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
     background: var(--warn-bg); color: var(--warn-text);
   }
   .prazos-fieldset { margin-top: 8px; }
   .prazos-fieldset .diario-form-label { margin-bottom: 4px; }
   .prazos-inline { display: flex; gap: 8px; }
   .prazos-inline > div { flex: 1; }
-  .prazos-inline label { display: block; font-size: 10px; color: var(--text-muted); margin-bottom: 3px; }
+  .prazos-inline label { display: block; font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 3px; }
 
-  .diario-form { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
-  .diario-form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .diario-form { margin-top: 14px; border-top: 1px dashed var(--border); padding-top: 12px; }
+  .diario-form-row { display: flex; gap: 8px; margin-bottom: 9px; }
   .diario-form select {
-    font-family: var(--font); font-size: 12.5px; color: var(--text); background: var(--bg);
-    border: 1px solid var(--border-strong); border-radius: 8px; padding: 6px 8px;
+    font-family: var(--font); font-size: 12.5px; color: var(--text); background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px;
   }
   .diario-form input[type="date"] {
-    font-family: var(--font); font-size: 12.5px; color: var(--text); background: var(--bg);
-    border: 1px solid var(--border-strong); border-radius: 8px; padding: 6px 8px;
+    font-family: var(--font-mono); font-size: 12.5px; color: var(--text); background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; color-scheme: dark;
   }
   .diario-form textarea { min-height: 44px; font-size: 12.5px; }
-  .diario-form-label { font-size: 10.5px; color: var(--text-muted); display: block; margin-bottom: 3px; }
+  .diario-form-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 4px; }
   .add-btn {
-    font-family: var(--font); font-size: 12.5px; font-weight: 500; color: var(--card);
-    background: var(--accent); border: none; border-radius: 8px; padding: 7px 14px; cursor: pointer;
+    font-family: var(--font); font-size: 12.5px; font-weight: 700; color: #0A0E1A;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: none;
+    border-radius: 9px; padding: 8px 15px; cursor: pointer;
   }
   .add-btn:active { transform: scale(0.98); }
   .admin-row {
-    display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap;
+    display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; flex-wrap: wrap;
   }
   .admin-state { font-size: 12px; color: var(--text-muted); }
   .admin-btn {
-    font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--text-secondary);
-    background: transparent; border: 1px solid var(--border-strong); border-radius: 8px;
-    padding: 5px 12px; cursor: pointer;
+    font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border-strong); border-radius: 9px;
+    padding: 6px 13px; cursor: pointer;
   }
-  .admin-btn.active { color: var(--danger-text); border-color: var(--danger-text); }
+  .admin-btn.active { color: var(--danger-text); border-color: rgba(255,107,107,0.4); background: var(--danger-bg); }
 
-  .filter-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .filter-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }
   .filter-btn {
-    font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--text-secondary);
-    background: transparent; border: 1px solid var(--border-strong); border-radius: 20px;
-    padding: 5px 13px; cursor: pointer;
+    font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border-strong); border-radius: 20px;
+    padding: 6px 14px; cursor: pointer;
   }
-  .filter-btn:hover { background: var(--bg); }
-  .filter-btn.active { background: var(--text); color: var(--card); border-color: var(--text); }
+  .filter-btn:hover { background: rgba(255,255,255,0.07); }
+  .filter-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #0A0E1A; border-color: transparent;
+  }
 
-  .neg-row { display: flex; align-items: center; gap: 8px; margin: 6px 0 12px; flex-wrap: wrap; }
+  .neg-row { display: flex; align-items: center; gap: 8px; margin: 8px 0 14px; padding-left: 49px; flex-wrap: wrap; }
   .neg-badge {
-    font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; white-space: nowrap;
+    font-size: 10.5px; padding: 3px 10px; border-radius: 20px; font-weight: 700; white-space: nowrap;
+    letter-spacing: 0.02em;
   }
   .neg-badge.andamento { background: var(--ok-bg); color: var(--ok-text); }
-  .neg-badge.finalizado { background: #DCEFE0; color: #2A7A45; }
-  .neg-badge.encerrada { background: #EDEAE4; color: #6B6A62; }
-  @media (prefers-color-scheme: dark) {
-    .neg-badge.finalizado { background: #1D3324; color: #7FCB93; }
-    .neg-badge.encerrada { background: #33312A; color: #B0AEA3; }
-  }
+  .neg-badge.finalizado { background: rgba(92, 224, 187, 0.22); color: #8CF5D8; }
+  .neg-badge.encerrada { background: rgba(255,255,255,0.08); color: var(--text-muted); }
   .neg-select {
-    font-family: var(--font); font-size: 12px; color: var(--text-secondary); background: var(--card);
-    border: 1px solid var(--border-strong); border-radius: 6px; padding: 3px 8px; cursor: pointer;
+    font-family: var(--font); font-size: 12px; color: var(--text-secondary); background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-strong); border-radius: 7px; padding: 3px 8px; cursor: pointer;
   }
   .neg-select:hover { border-color: var(--accent); }
   .neg-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   .del-entry-btn {
-    font-family: var(--font); font-size: 11px; color: var(--danger-text); background: transparent;
-    border: none; cursor: pointer; padding: 0 0 0 8px; text-decoration: underline;
+    font-family: var(--font); font-size: 10.5px; color: var(--danger-text); background: transparent;
+    border: none; cursor: pointer; padding: 0 0 0 8px;
   }
-  .diario-entry-editing { border-color: var(--accent, #7A6A52); }
-  .del-entry-btn { margin-right: 4px; }
+  .del-entry-btn:hover { text-decoration: underline; }
+  .diario-entry-editing .diario-entry-body { border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -283,6 +314,7 @@ const TERRENOS = [
   {
     id: "guajiru",
     nome: "Guajiru",
+    accent: "#5B8DEF",
     meta: "São Miguel do Gostoso · Corretor: Neto Maroto · Proprietário: Sr. Grimaldo",
     badge: { text: "Travado no vendedor", cls: "" },
     priority: false,
@@ -301,6 +333,7 @@ const TERRENOS = [
   {
     id: "uhane",
     nome: "Uhane",
+    accent: "#9B7BEF",
     meta: "São Miguel do Gostoso · Vendedor: Bruno Pacheco",
     badge: { text: "Relação sensível", cls: "" },
     priority: false,
@@ -315,6 +348,7 @@ const TERRENOS = [
   {
     id: "jobiana",
     nome: "Jobiana",
+    accent: "#34D8B0",
     meta: "Touros · Proprietária/vendedora: Alda Macedo · Advogada: Jacobina",
     badge: { text: "Negociando pagamento", cls: "info" },
     priority: false,
@@ -349,6 +383,7 @@ const TERRENOS = [
   {
     id: "rua-dos-camaroes",
     nome: "Rua dos Camarões",
+    accent: "#FF6B6B",
     meta: "São Miguel do Gostoso · Vendedor original: Neto Maroto · Vendedora atual: Prefeitura",
     badge: { text: "Prioridade máxima", cls: "danger" },
     priority: true,
@@ -391,6 +426,7 @@ const TERRENOS = [
   {
     id: "lote-santo-cristo",
     nome: "Lote Santo Cristo",
+    accent: "#FBBF64",
     meta: "Localização e vendedor a confirmar",
     badge: { text: "Novo cadastro", cls: "info" },
     priority: false,
@@ -439,11 +475,18 @@ function formatDatePt(iso) {
   return `${d}/${m}/${y}`;
 }
 
+function initials(nome) {
+  return nome.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+}
+
 function cardHTML(t) {
   return `
-    <div class="card ${t.priority ? "priority" : ""}" data-id="${t.id}">
+    <div class="card ${t.priority ? "priority" : ""}" data-id="${t.id}" style="--card-accent:${t.accent}">
       <div class="card-head">
-        <p class="card-title">${t.nome}</p>
+        <div class="card-heading">
+          <div class="avatar">${initials(t.nome)}</div>
+          <p class="card-title">${t.nome}</p>
+        </div>
         <span class="badge ${t.badge.cls}">${t.badge.text}</span>
       </div>
       <p class="meta">${t.meta}</p>
@@ -478,10 +521,10 @@ function cardHTML(t) {
         </div>
       </div>
 
-      <button class="etapas-toggle" data-toggle="diario-${t.id}" type="button">
-        <span class="chev">›</span> Diário de acompanhamento
+      <button class="etapas-toggle open" data-toggle="diario-${t.id}" type="button">
+        <span class="chev">›</span> Linha do tempo
       </button>
-      <div class="etapas-body" data-etapasbody="diario-${t.id}">
+      <div class="etapas-body open" data-etapasbody="diario-${t.id}">
         <ul class="diario-list" data-diariolist="${t.id}"></ul>
 
         <div class="diario-form">
@@ -593,6 +636,8 @@ function applyFilter() {
   });
 }
 
+const DOT_COLOR = { kaua: "var(--ok-text)", jp: "var(--warn-text)", luiz: "var(--danger-text)", outro: "var(--text-muted)" };
+
 function renderDiario(card, id) {
   const entries = (diarioState[id] || []).slice().sort((a, b) => (a.data < b.data ? 1 : -1));
   const listEl = card.querySelector(`[data-diariolist="${id}"]`);
@@ -602,10 +647,12 @@ function renderDiario(card, id) {
   }
   const today = todayISO();
   listEl.innerHTML = entries.map(e => {
+    const dotColor = DOT_COLOR[e.responsavel] || DOT_COLOR.outro;
     if (isAdmin && editingState[id] === e.id) {
       const prazosArr = Array.isArray(e.prazos) ? e.prazos.filter(Boolean) : (e.prazo ? [e.prazo] : []);
       return `
-        <li class="diario-entry diario-entry-editing">
+        <li class="diario-entry diario-entry-editing" style="--dot-color:${dotColor}">
+        <div class="diario-entry-body">
           <div class="diario-form-row">
             <div>
               <label class="diario-form-label">Responsável</label>
@@ -635,6 +682,7 @@ function renderDiario(card, id) {
             <button class="admin-btn" data-canceledit="${id}" type="button">Cancelar</button>
             <button class="add-btn" data-saveedit="${id}" data-entryid="${e.id}" type="button">Salvar edição</button>
           </div>
+        </div>
         </li>
       `;
     }
@@ -659,14 +707,16 @@ function renderDiario(card, id) {
          <button class="del-entry-btn" data-delentry="${id}" data-entryid="${e.id}" type="button">Excluir</button>`
       : "";
     return `
-      <li class="diario-entry">
-        <div class="diario-entry-head">
-          <span class="diario-who ${whoCls}">${whoLabel}</span>
-          <span class="diario-date">${formatDatePt(e.data)}</span>
-          ${adminBtns}
+      <li class="diario-entry" style="--dot-color:${dotColor}">
+        <div class="diario-entry-body">
+          <div class="diario-entry-head">
+            <span class="diario-who ${whoCls}">${whoLabel}</span>
+            <span class="diario-date">${formatDatePt(e.data)}</span>
+            ${adminBtns}
+          </div>
+          <p class="diario-nota">${e.nota}</p>
+          ${prazoHTML}
         </div>
-        <p class="diario-nota">${e.nota}</p>
-        ${prazoHTML}
       </li>
     `;
   }).join("");
