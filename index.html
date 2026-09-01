@@ -222,6 +222,34 @@
     padding: 5px 12px; cursor: pointer;
   }
   .admin-btn.active { color: var(--danger-text); border-color: var(--danger-text); }
+
+  .filter-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .filter-btn {
+    font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--text-secondary);
+    background: transparent; border: 1px solid var(--border-strong); border-radius: 20px;
+    padding: 5px 13px; cursor: pointer;
+  }
+  .filter-btn:hover { background: var(--bg); }
+  .filter-btn.active { background: var(--text); color: var(--card); border-color: var(--text); }
+
+  .neg-row { display: flex; align-items: center; gap: 8px; margin: 6px 0 12px; flex-wrap: wrap; }
+  .neg-badge {
+    font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; white-space: nowrap;
+  }
+  .neg-badge.andamento { background: var(--ok-bg); color: var(--ok-text); }
+  .neg-badge.finalizado { background: #DCEFE0; color: #2A7A45; }
+  .neg-badge.encerrada { background: #EDEAE4; color: #6B6A62; }
+  @media (prefers-color-scheme: dark) {
+    .neg-badge.finalizado { background: #1D3324; color: #7FCB93; }
+    .neg-badge.encerrada { background: #33312A; color: #B0AEA3; }
+  }
+  .neg-actions { display: flex; gap: 6px; }
+  .neg-actions button {
+    font-family: var(--font); font-size: 11px; color: var(--text-secondary); background: transparent;
+    border: 1px solid var(--border-strong); border-radius: 6px; padding: 3px 9px; cursor: pointer;
+  }
+  .neg-actions button:hover { background: var(--bg); }
+  .neg-actions button.reopen { color: var(--accent); border-color: var(--accent); }
   .del-entry-btn {
     font-family: var(--font); font-size: 11px; color: var(--danger-text); background: transparent;
     border: none; cursor: pointer; padding: 0 0 0 8px; text-decoration: underline;
@@ -239,6 +267,12 @@
     <div class="admin-row">
       <span class="admin-state" id="admin-state">Modo padrão: qualquer pessoa pode adicionar registros no diário. Status e pendências só o administrador edita.</span>
       <button class="admin-btn" id="admin-toggle" type="button">Entrar como administrador</button>
+    </div>
+    <div class="filter-row" id="filter-row">
+      <button class="filter-btn active" data-filter="todos" type="button">Todos</button>
+      <button class="filter-btn" data-filter="andamento" type="button">Em andamento</button>
+      <button class="filter-btn" data-filter="finalizado" type="button">Finalizados</button>
+      <button class="filter-btn" data-filter="encerrada" type="button">Encerrados</button>
     </div>
   </header>
 
@@ -261,7 +295,8 @@ const TERRENOS = [
         "Anuência da prefeitura de São Miguel para passar a matrícula para o Sr. Grimaldo",
         "Transferência da matrícula do Sr. Grimaldo para a Carvalho"
       ],
-      etapaAtual: 1
+      etapaAtual: 1,
+      negociacao: "andamento"
     }
   },
   {
@@ -274,7 +309,8 @@ const TERRENOS = [
       status: "Pendente: IPTU do ano passado, não pago pelo vendedor.",
       cobranca: "João Paulo (sócio, amigo do Bruno) assumiu a cobrança, porque o Bruno é amigo próximo.",
       etapas: ["Pagamento do IPTU em atraso"],
-      etapaAtual: 1
+      etapaAtual: 1,
+      negociacao: "andamento"
     }
   },
   {
@@ -294,6 +330,7 @@ const TERRENOS = [
         "Escritura"
       ],
       etapaAtual: 2,
+      negociacao: "andamento",
       diario: [
         {
           responsavel: "kaua",
@@ -329,6 +366,7 @@ const TERRENOS = [
         "Financiamento junto à Caixa Econômica"
       ],
       etapaAtual: 1,
+      negociacao: "andamento",
       diario: [
         {
           responsavel: "kaua",
@@ -349,6 +387,20 @@ const TERRENOS = [
           nota: "A partir de amanhã: Kauã vai à prefeitura falar com o Fernando, e ao cartório falar com a Isabelle pra saber se ela já conversou com o Fernando."
         }
       ]
+    }
+  },
+  {
+    id: "lote-santo-cristo",
+    nome: "Lote Santo Cristo",
+    meta: "Localização e vendedor a confirmar",
+    badge: { text: "Novo cadastro", cls: "info" },
+    priority: false,
+    defaults: {
+      status: "Terreno recém-cadastrado — preencha aqui a situação assim que tiver informação (entre em modo administrador para editar).",
+      cobranca: "A confirmar.",
+      etapas: [],
+      etapaAtual: 0,
+      negociacao: "andamento"
     }
   }
 ];
@@ -396,6 +448,8 @@ function cardHTML(t) {
         <span class="badge ${t.badge.cls}">${t.badge.text}</span>
       </div>
       <p class="meta">${t.meta}</p>
+
+      <div class="neg-row" data-negrow="${t.id}"></div>
 
       <p class="field-label field-label-prominent">Status / pendência atual</p>
       <textarea data-field="status" class="lockable" readonly>${t.defaults.status}</textarea>
@@ -489,10 +543,64 @@ function parseEtapas(raw) {
 
 const diarioState = {};
 const editingState = {};
+const negStatusState = {};
+const NEG_LABEL = { andamento: "Em andamento", finalizado: "Finalizado", encerrada: "Encerrada" };
 const RESP_LABEL = { kaua: "Kauã", jp: "João Paulo", luiz: "Luiz Filippe", outro: "Outro" };
 
 function escapeAttr(str) {
   return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
+function renderNegStatus(card, id) {
+  const status = negStatusState[id] || "andamento";
+  const row = card.querySelector(`[data-negrow="${id}"]`);
+  if (!row) return;
+  card.dataset.negstatus = status;
+
+  let actionsHTML = "";
+  if (isAdmin) {
+    if (status === "andamento") {
+      actionsHTML = `
+        <div class="neg-actions">
+          <button data-negset="${id}" data-value="finalizado" type="button">Finalizar</button>
+          <button data-negset="${id}" data-value="encerrada" type="button">Encerrar</button>
+        </div>`;
+    } else {
+      actionsHTML = `
+        <div class="neg-actions">
+          <button class="reopen" data-negset="${id}" data-value="andamento" type="button">Reabrir negociação</button>
+        </div>`;
+    }
+  }
+
+  row.innerHTML = `<span class="neg-badge ${status}">${NEG_LABEL[status]}</span>${actionsHTML}`;
+}
+
+async function setNegStatus(id, value) {
+  negStatusState[id] = value;
+  const card = grid.querySelector(`[data-id="${id}"]`);
+  renderNegStatus(card, id);
+  applyFilter();
+  try {
+    const existing = await apiGet().catch(() => null);
+    const all = existing && existing.value ? JSON.parse(existing.value) : {};
+    all[id] = all[id] || {};
+    all[id].negociacao = value;
+    const result = await apiSet(JSON.stringify(all));
+    globalStatus.textContent = result ? `Negociação marcada como "${NEG_LABEL[value]}".` : "Não foi possível salvar.";
+  } catch (err) {
+    globalStatus.textContent = "Não foi possível salvar.";
+  }
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 3000);
+}
+
+let currentFilter = "todos";
+function applyFilter() {
+  grid.querySelectorAll(".card").forEach(card => {
+    const status = card.dataset.negstatus || "andamento";
+    card.style.display = (currentFilter === "todos" || status === currentFilter) ? "" : "none";
+  });
 }
 
 function renderDiario(card, id) {
@@ -606,8 +714,11 @@ TERRENOS.forEach(t => {
   renderStepper(card, t.defaults.etapas, t.defaults.etapaAtual);
   diarioState[t.id] = ensureIds(t.defaults.diario ? t.defaults.diario.slice() : []);
   renderDiario(card, t.id);
+  negStatusState[t.id] = t.defaults.negociacao || "andamento";
+  renderNegStatus(card, t.id);
 });
 applyLockState();
+applyFilter();
 
 async function loadAll() {
   globalStatus.textContent = "Carregando dados salvos...";
@@ -629,10 +740,13 @@ async function loadAll() {
         renderStepper(card, parseEtapas(etapasText), etapaAtual);
         diarioState[t.id] = ensureIds(Array.isArray(s.diario) ? s.diario : (t.defaults.diario ? t.defaults.diario.slice() : []));
         renderDiario(card, t.id);
+        negStatusState[t.id] = s.negociacao ?? t.defaults.negociacao ?? "andamento";
+        renderNegStatus(card, t.id);
         const lastSavedEl = card.querySelector(`[data-lastsaved="${t.id}"]`);
         if (s.data) lastSavedEl.textContent = `Atualizado em ${formatDatePt(s.data)}`;
       });
     }
+    applyFilter();
     globalStatus.textContent = "";
   } catch (err) {
     globalStatus.textContent = "Nenhum dado salvo ainda — preencha e clique em salvar.";
@@ -651,7 +765,7 @@ async function saveCard(id) {
   try {
     const existing = await apiGet().catch(() => null);
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
-    all[id] = { status, cobranca, data, etapas: etapasText, etapaAtual, diario: diarioState[id] || [] };
+    all[id] = { ...(all[id] || {}), status, cobranca, data, etapas: etapasText, etapaAtual, diario: diarioState[id] || [] };
     const result = await apiSet(JSON.stringify(all));
     renderStepper(card, parseEtapas(etapasText), etapaAtual);
     const lastSavedEl = card.querySelector(`[data-lastsaved="${id}"]`);
@@ -808,10 +922,14 @@ adminToggleBtn.addEventListener("click", () => {
   TERRENOS.forEach(t => {
     const card = grid.querySelector(`[data-id="${t.id}"]`);
     renderDiario(card, t.id);
+    renderNegStatus(card, t.id);
   });
 });
 
 grid.addEventListener("click", (e) => {
+  const negBtn = e.target.closest("[data-negset]");
+  if (negBtn) { setNegStatus(negBtn.getAttribute("data-negset"), negBtn.getAttribute("data-value")); return; }
+
   const saveBtn = e.target.closest("[data-save]");
   if (saveBtn) { saveCard(saveBtn.getAttribute("data-save")); return; }
 
@@ -838,6 +956,15 @@ grid.addEventListener("click", (e) => {
 
   const saveEditBtn = e.target.closest("[data-saveedit]");
   if (saveEditBtn) saveDiarioEdit(saveEditBtn.getAttribute("data-saveedit"), saveEditBtn.getAttribute("data-entryid"));
+});
+
+const filterRow = document.getElementById("filter-row");
+filterRow.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-filter]");
+  if (!btn) return;
+  currentFilter = btn.getAttribute("data-filter");
+  filterRow.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b === btn));
+  applyFilter();
 });
 
 loadAll();
