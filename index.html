@@ -320,6 +320,23 @@
   }
   .detail-title { font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.01em; }
   .detail-meta { font-size: 13px; color: var(--text-secondary); margin: 3px 0 0; }
+  .detail-flag {
+    display: flex; align-items: center; gap: 10px;
+    margin: 16px 0 22px; padding: 13px 18px; border-radius: 12px;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.01em;
+    background: var(--warn-bg); color: var(--warn-text);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .detail-flag.danger {
+    background: var(--danger-bg); color: var(--danger-text);
+    border-color: rgba(255,107,107,0.35);
+    box-shadow: 0 0 0 1px rgba(255,107,107,0.12), 0 10px 26px -14px rgba(255,90,90,0.45);
+  }
+  .detail-flag.info { background: var(--ok-bg); color: var(--ok-text); }
+  .detail-flag-dot {
+    width: 9px; height: 9px; border-radius: 50%; background: currentColor; flex: none;
+    box-shadow: 0 0 9px currentColor;
+  }
   .neg-select {
     font-family: var(--font); font-size: 11.5px; font-weight: 700; letter-spacing: 0.02em;
     padding: 4px 10px; border-radius: 20px; cursor: pointer; appearance: none;
@@ -572,7 +589,11 @@ function cardHTML(t) {
               <h2 class="detail-title">${t.nome}</h2>
               <p class="detail-meta">${t.meta}</p>
             </div>
-            <span class="badge ${t.badge.cls}">${t.badge.text}</span>
+          </div>
+
+          <div class="detail-flag ${t.badge.cls}">
+            <span class="detail-flag-dot"></span>
+            ${t.badge.text}
           </div>
 
         <p class="field-label field-label-prominent">Status / pendência atual</p>
@@ -736,7 +757,7 @@ function renderDiario(card, id) {
     if (isAdmin && editingState[id] === e.id) {
       const prazosArr = Array.isArray(e.prazos) ? e.prazos.filter(Boolean) : (e.prazo ? [e.prazo] : []);
       return `
-        <li class="diario-entry diario-entry-editing" style="--dot-color:${dotColor}">
+        <li class="diario-entry diario-entry-editing" data-entryid="${e.id}" style="--dot-color:${dotColor}">
         <div class="diario-entry-body open">
           <div class="diario-form-row">
             <div>
@@ -793,7 +814,7 @@ function renderDiario(card, id) {
       : "";
     const isOpen = expandedSet.has(e.id);
     return `
-      <li class="diario-entry" style="--dot-color:${dotColor}">
+      <li class="diario-entry" data-entryid="${e.id}" style="--dot-color:${dotColor}">
         <button class="diario-date-btn" data-toggleentry="${id}" data-entryid="${e.id}" type="button" aria-expanded="${isOpen}">
           <span class="diario-date">${formatDatePt(e.data)}</span>
           <span class="diario-who ${whoCls}">${whoLabel}</span>
@@ -1113,6 +1134,20 @@ filterRow.addEventListener("click", (e) => {
   filterRow.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b === btn));
   applyFilter();
 });
+
+document.addEventListener("click", (e) => {
+  const insideEntry = e.target.closest(".diario-entry");
+  const insideId = insideEntry ? insideEntry.getAttribute("data-entryid") : null;
+  Object.keys(expandedEntries).forEach(tId => {
+    const set = expandedEntries[tId];
+    if (!set || !set.size) return;
+    const toClose = [...set].filter(eid => eid !== insideId);
+    if (!toClose.length) return;
+    toClose.forEach(eid => set.delete(eid));
+    const card = grid.querySelector(`[data-id="${tId}"]`);
+    if (card) renderDiario(card, tId);
+  });
+}, true);
 
 loadAll();
 </script>
