@@ -288,6 +288,20 @@
 
   .neg-row { display: flex; align-items: center; gap: 8px; margin: 8px 0 14px; padding-left: 49px; flex-wrap: wrap; }
 
+  .prazo-row { padding-left: 49px; margin: -6px 0 14px; min-height: 1px; }
+  .prazo-row-detail { padding-left: 0; margin: -8px 0 20px; }
+  .prazo-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.01em;
+    padding: 4px 11px; border-radius: 20px;
+    background: rgba(124,156,255,0.12); color: var(--accent); border: 1px solid transparent;
+  }
+  .prazo-badge::before { content: "⏱"; font-size: 10px; }
+  .prazo-badge.alert {
+    background: var(--danger-bg); color: var(--danger-text); border-color: rgba(255,107,107,0.4);
+    box-shadow: 0 0 0 1px rgba(255,107,107,0.12), 0 0 12px -2px rgba(255,90,90,0.5);
+  }
+
   .expand-btn {
     margin-top: 4px; padding-top: 13px; border-top: 1px dashed var(--border);
     font-family: var(--font); font-size: 12.5px; font-weight: 600; color: var(--accent);
@@ -576,6 +590,7 @@ function cardHTML(t) {
       <p class="meta">${t.meta}</p>
 
       <div class="neg-row" data-negrow="${t.id}"></div>
+      <div class="prazo-row" data-prazorow="${t.id}"></div>
 
       <button class="expand-btn" data-toggle="details-${t.id}" type="button">
         <span class="chev">›</span> Ver detalhes completos
@@ -596,6 +611,8 @@ function cardHTML(t) {
             <span class="detail-flag-dot"></span>
             <span data-badgedetailtext="${t.id}">${t.badge.text}</span>
           </div>
+
+          <div class="prazo-row prazo-row-detail" data-prazorowdetail="${t.id}"></div>
 
         <p class="field-label field-label-prominent">Status / pendência atual</p>
         <textarea data-field="status" class="lockable" readonly>${t.defaults.status}</textarea>
@@ -884,6 +901,7 @@ TERRENOS.forEach(t => {
   renderStepper(card, t.defaults.etapas, t.defaults.etapaAtual);
   diarioState[t.id] = ensureIds(t.defaults.diario ? t.defaults.diario.slice() : []);
   renderDiario(card, t.id);
+  renderPrazoBadge(card, t.id);
   negStatusState[t.id] = t.defaults.negociacao || "andamento";
   renderNegStatus(card, t.id);
 });
@@ -910,6 +928,7 @@ async function loadAll() {
         renderStepper(card, parseEtapas(etapasText), etapaAtual);
         diarioState[t.id] = ensureIds(Array.isArray(s.diario) ? s.diario : (t.defaults.diario ? t.defaults.diario.slice() : []));
         renderDiario(card, t.id);
+        renderPrazoBadge(card, t.id);
         negStatusState[t.id] = s.negociacao ?? t.defaults.negociacao ?? "andamento";
         renderNegStatus(card, t.id);
         const lastSavedEl = card.querySelector(`[data-lastsaved="${t.id}"]`);
@@ -952,6 +971,25 @@ async function saveCard(id) {
   saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 3000);
 }
 
+function currentPromisedDeadline(id) {
+  const entries = (diarioState[id] || []).slice().sort((a, b) => (a.data < b.data ? 1 : -1));
+  for (const e of entries) {
+    const prazos = Array.isArray(e.prazos) ? e.prazos.filter(Boolean) : (e.prazo ? [e.prazo] : []);
+    if (prazos.length) return prazos[prazos.length - 1];
+  }
+  return null;
+}
+
+function renderPrazoBadge(card, id) {
+  const deadline = currentPromisedDeadline(id);
+  const today = todayISO();
+  card.querySelectorAll(`[data-prazorow="${id}"], [data-prazorowdetail="${id}"]`).forEach(el => {
+    if (!deadline) { el.innerHTML = ""; return; }
+    const isAlert = deadline <= today;
+    el.innerHTML = `<span class="prazo-badge ${isAlert ? "alert" : ""}">Prazo prometido: ${formatDatePt(deadline)}</span>`;
+  });
+}
+
 function latestDiarioSummary(id) {
   const entries = diarioState[id] || [];
   if (!entries.length) return null;
@@ -991,6 +1029,7 @@ async function addDiarioEntry(id) {
   diarioState[id] = diarioState[id] || [];
   diarioState[id].push(entry);
   renderDiario(card, id);
+  renderPrazoBadge(card, id);
   const statusSummary = syncStatusFromDiario(card, id);
   notaEl.value = "";
   card.querySelector('[data-diario-field="prazo1"]').value = "";
@@ -1052,6 +1091,7 @@ async function saveDiarioEdit(id, entryId) {
 
   editingState[id] = null;
   renderDiario(card, id);
+  renderPrazoBadge(card, id);
   const statusSummary = syncStatusFromDiario(card, id);
 
   try {
@@ -1073,6 +1113,7 @@ async function deleteDiarioEntry(id, entryId) {
   const card = grid.querySelector(`[data-id="${id}"]`);
   diarioState[id] = (diarioState[id] || []).filter(e => e.id !== entryId);
   renderDiario(card, id);
+  renderPrazoBadge(card, id);
   const statusSummary = syncStatusFromDiario(card, id);
   try {
     const existing = await apiGet().catch(() => null);
@@ -1133,6 +1174,7 @@ resyncBtn.addEventListener("click", async () => {
     TERRENOS.forEach(t => {
       const card = grid.querySelector(`[data-id="${t.id}"]`);
       const summary = syncStatusFromDiario(card, t.id);
+      renderPrazoBadge(card, t.id);
       if (summary) {
         all[t.id] = all[t.id] || {};
         all[t.id].status = summary;
@@ -1228,6 +1270,13 @@ document.addEventListener("click", (e) => {
     if (card) renderDiario(card, tId);
   });
 }, true);
+
+setInterval(() => {
+  TERRENOS.forEach(t => {
+    const card = grid.querySelector(`[data-id="${t.id}"]`);
+    if (card) renderPrazoBadge(card, t.id);
+  });
+}, 60000);
 
 loadAll();
 </script>
