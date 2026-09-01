@@ -61,6 +61,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 20px;
+    align-items: start;
   }
   .card {
     position: relative;
@@ -278,16 +279,19 @@
   .expand-btn.open .chev { transform: rotate(90deg); }
   .card-details { display: none; margin-top: 4px; }
   .card-details.open { display: block; }
-  .neg-badge {
-    font-size: 10.5px; padding: 3px 10px; border-radius: 20px; font-weight: 700; white-space: nowrap;
-    letter-spacing: 0.02em;
-  }
-  .neg-badge.andamento { background: var(--ok-bg); color: var(--ok-text); }
-  .neg-badge.finalizado { background: rgba(92, 224, 187, 0.22); color: #8CF5D8; }
-  .neg-badge.encerrada { background: rgba(255,255,255,0.08); color: var(--text-muted); }
   .neg-select {
-    font-family: var(--font); font-size: 12px; color: var(--text-secondary); background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border-strong); border-radius: 7px; padding: 3px 8px; cursor: pointer;
+    font-family: var(--font); font-size: 11.5px; font-weight: 700; letter-spacing: 0.02em;
+    padding: 4px 10px; border-radius: 20px; cursor: pointer; appearance: none;
+    background: var(--ok-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%235CE0BB' stroke-width='2'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 6px center / 14px;
+    color: var(--ok-text); border: 1px solid transparent; padding-right: 24px;
+  }
+  .neg-select.finalizado {
+    background-color: rgba(92, 224, 187, 0.22); color: #8CF5D8;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%238CF5D8' stroke-width='2'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  }
+  .neg-select.encerrada {
+    background-color: rgba(255,255,255,0.08); color: var(--text-muted);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236C7395' stroke-width='2'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
   }
   .neg-select:hover { border-color: var(--accent); }
   .neg-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
@@ -621,8 +625,7 @@ function renderNegStatus(card, id) {
     .join("");
 
   row.innerHTML = `
-    <span class="neg-badge ${status}">${NEG_LABEL[status]}</span>
-    <select class="neg-select" data-negselect="${id}" aria-label="Situação da negociação">${opts}</select>
+    <select class="neg-select ${status}" data-negselect="${id}" aria-label="Situação da negociação">${opts}</select>
   `;
 }
 
