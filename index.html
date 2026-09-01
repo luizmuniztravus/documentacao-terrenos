@@ -267,6 +267,17 @@
   }
 
   .neg-row { display: flex; align-items: center; gap: 8px; margin: 8px 0 14px; padding-left: 49px; flex-wrap: wrap; }
+
+  .expand-btn {
+    margin-top: 4px; padding-top: 13px; border-top: 1px dashed var(--border);
+    font-family: var(--font); font-size: 12.5px; font-weight: 600; color: var(--accent);
+    background: transparent; border-left: none; border-right: none; border-bottom: none;
+    cursor: pointer; display: flex; align-items: center; gap: 7px; width: 100%;
+  }
+  .expand-btn .chev { transition: transform 0.15s ease; font-size: 11px; }
+  .expand-btn.open .chev { transform: rotate(90deg); }
+  .card-details { display: none; margin-top: 4px; }
+  .card-details.open { display: block; }
   .neg-badge {
     font-size: 10.5px; padding: 3px 10px; border-radius: 20px; font-weight: 700; white-space: nowrap;
     letter-spacing: 0.02em;
@@ -493,77 +504,83 @@ function cardHTML(t) {
 
       <div class="neg-row" data-negrow="${t.id}"></div>
 
-      <p class="field-label field-label-prominent">Status / pendência atual</p>
-      <textarea data-field="status" class="lockable" readonly>${t.defaults.status}</textarea>
-
-      <p class="field-label field-label-prominent">Quem está cobrando / próximo passo</p>
-      <textarea data-field="cobranca" class="lockable" readonly>${t.defaults.cobranca}</textarea>
-
-      <div class="update-row">
-        <label class="field-label" style="margin:0" for="date-${t.id}">Última atualização</label>
-        <input type="date" id="date-${t.id}" data-field="data" value="${todayISO()}">
-        <button class="save-btn" data-save="${t.id}">Salvar</button>
-      </div>
-      <p class="last-saved" data-lastsaved="${t.id}"></p>
-
-      <button class="etapas-toggle" data-toggle="${t.id}" type="button">
-        <span class="chev">›</span> Próximas etapas
+      <button class="expand-btn" data-toggle="details-${t.id}" type="button">
+        <span class="chev">›</span> Ver detalhes completos
       </button>
-      <div class="etapas-body" data-etapasbody="${t.id}">
-        <ol class="stepper" data-stepper="${t.id}"></ol>
-        <p class="etapas-edit-label">Editar lista (uma etapa por linha) e marcar qual é a atual</p>
-        <div class="etapas-row">
-          <textarea data-field="etapas">${t.defaults.etapas.join("\n")}</textarea>
-          <div class="etapa-atual-field">
-            <label for="atual-${t.id}">Etapa atual (nº)</label>
-            <input type="text" inputmode="numeric" id="atual-${t.id}" data-field="etapaAtual" value="${t.defaults.etapaAtual}">
+
+      <div class="card-details" data-etapasbody="details-${t.id}">
+        <p class="field-label field-label-prominent">Status / pendência atual</p>
+        <textarea data-field="status" class="lockable" readonly>${t.defaults.status}</textarea>
+
+        <p class="field-label field-label-prominent">Quem está cobrando / próximo passo</p>
+        <textarea data-field="cobranca" class="lockable" readonly>${t.defaults.cobranca}</textarea>
+
+        <div class="update-row">
+          <label class="field-label" style="margin:0" for="date-${t.id}">Última atualização</label>
+          <input type="date" id="date-${t.id}" data-field="data" value="${todayISO()}">
+          <button class="save-btn" data-save="${t.id}">Salvar</button>
+        </div>
+        <p class="last-saved" data-lastsaved="${t.id}"></p>
+
+        <button class="etapas-toggle" data-toggle="${t.id}" type="button">
+          <span class="chev">›</span> Próximas etapas
+        </button>
+        <div class="etapas-body" data-etapasbody="${t.id}">
+          <ol class="stepper" data-stepper="${t.id}"></ol>
+          <p class="etapas-edit-label">Editar lista (uma etapa por linha) e marcar qual é a atual</p>
+          <div class="etapas-row">
+            <textarea data-field="etapas">${t.defaults.etapas.join("\n")}</textarea>
+            <div class="etapa-atual-field">
+              <label for="atual-${t.id}">Etapa atual (nº)</label>
+              <input type="text" inputmode="numeric" id="atual-${t.id}" data-field="etapaAtual" value="${t.defaults.etapaAtual}">
+            </div>
           </div>
         </div>
-      </div>
 
-      <button class="etapas-toggle open" data-toggle="diario-${t.id}" type="button">
-        <span class="chev">›</span> Linha do tempo
-      </button>
-      <div class="etapas-body open" data-etapasbody="diario-${t.id}">
-        <ul class="diario-list" data-diariolist="${t.id}"></ul>
+        <button class="etapas-toggle open" data-toggle="diario-${t.id}" type="button">
+          <span class="chev">›</span> Linha do tempo
+        </button>
+        <div class="etapas-body open" data-etapasbody="diario-${t.id}">
+          <ul class="diario-list" data-diariolist="${t.id}"></ul>
 
-        <div class="diario-form">
-          <div class="diario-form-row">
-            <div>
-              <label class="diario-form-label" for="resp-${t.id}">Responsável</label>
-              <select id="resp-${t.id}" data-diario-field="responsavel">
-                <option value="kaua">Kauã</option>
-                <option value="jp">João Paulo</option>
-                <option value="luiz">Luiz Filippe</option>
-                <option value="outro">Outro</option>
-              </select>
-            </div>
-            <div>
-              <label class="diario-form-label" for="data-diario-${t.id}">Data</label>
-              <input type="date" id="data-diario-${t.id}" data-diario-field="data" value="${todayISO()}">
-            </div>
-          </div>
-          <div class="prazos-fieldset">
-            <label class="diario-form-label">Prazos prometidos (preencha mais de um se foi reprogramado)</label>
-            <div class="prazos-inline">
+          <div class="diario-form">
+            <div class="diario-form-row">
               <div>
-                <label for="prazo1-${t.id}">Prazo 1</label>
-                <input type="date" id="prazo1-${t.id}" data-diario-field="prazo1">
+                <label class="diario-form-label" for="resp-${t.id}">Responsável</label>
+                <select id="resp-${t.id}" data-diario-field="responsavel">
+                  <option value="kaua">Kauã</option>
+                  <option value="jp">João Paulo</option>
+                  <option value="luiz">Luiz Filippe</option>
+                  <option value="outro">Outro</option>
+                </select>
               </div>
               <div>
-                <label for="prazo2-${t.id}">Prazo 2</label>
-                <input type="date" id="prazo2-${t.id}" data-diario-field="prazo2">
-              </div>
-              <div>
-                <label for="prazo3-${t.id}">Prazo 3</label>
-                <input type="date" id="prazo3-${t.id}" data-diario-field="prazo3">
+                <label class="diario-form-label" for="data-diario-${t.id}">Data</label>
+                <input type="date" id="data-diario-${t.id}" data-diario-field="data" value="${todayISO()}">
               </div>
             </div>
-          </div>
-          <label class="diario-form-label" for="nota-${t.id}">O que foi dito / combinado</label>
-          <textarea id="nota-${t.id}" data-diario-field="nota" placeholder="Ex: falou com o Fernando, disse que resolve até sexta"></textarea>
-          <div style="margin-top:8px; text-align:right">
-            <button class="add-btn" data-adddiario="${t.id}" type="button">Adicionar registro</button>
+            <div class="prazos-fieldset">
+              <label class="diario-form-label">Prazos prometidos (preencha mais de um se foi reprogramado)</label>
+              <div class="prazos-inline">
+                <div>
+                  <label for="prazo1-${t.id}">Prazo 1</label>
+                  <input type="date" id="prazo1-${t.id}" data-diario-field="prazo1">
+                </div>
+                <div>
+                  <label for="prazo2-${t.id}">Prazo 2</label>
+                  <input type="date" id="prazo2-${t.id}" data-diario-field="prazo2">
+                </div>
+                <div>
+                  <label for="prazo3-${t.id}">Prazo 3</label>
+                  <input type="date" id="prazo3-${t.id}" data-diario-field="prazo3">
+                </div>
+              </div>
+            </div>
+            <label class="diario-form-label" for="nota-${t.id}">O que foi dito / combinado</label>
+            <textarea id="nota-${t.id}" data-diario-field="nota" placeholder="Ex: falou com o Fernando, disse que resolve até sexta"></textarea>
+            <div style="margin-top:8px; text-align:right">
+              <button class="add-btn" data-adddiario="${t.id}" type="button">Adicionar registro</button>
+            </div>
           </div>
         </div>
       </div>
