@@ -380,6 +380,7 @@
     <div class="admin-row">
       <span class="admin-state" id="admin-state">Modo padrão: qualquer pessoa pode adicionar registros no diário. Status e pendências só o administrador edita.</span>
       <button class="admin-btn" id="admin-toggle" type="button">Entrar como administrador</button>
+      <button class="admin-btn" id="resync-status-btn" type="button" style="display:none">Atualizar status com o último registro (todos)</button>
     </div>
     <div class="filter-row" id="filter-row">
       <button class="filter-btn active" data-filter="todos" type="button">Todos</button>
@@ -436,7 +437,7 @@ const TERRENOS = [
     badge: { text: "Negociando pagamento", cls: "info" },
     priority: false,
     defaults: {
-      status: "Vendedora quer o valor à vista no contrato.",
+      status: "Kauã registrou em 13/08/2026: Kauã vai ao cartório verificar se a certidão de ônus já saiu.",
       cobranca: "Orientação do Bruno Pacheco (advogado): 50% no contrato (R$ 20 mil) + 50% na escritura. Kauã está negociando. Jacobina é a advogada da proprietária Alda Macedo; Kauã já conseguiu o telefone dela.",
       etapas: [
         "Negociar forma de pagamento (50% contrato + 50% escritura)",
@@ -471,7 +472,7 @@ const TERRENOS = [
     badge: { text: "Prioridade máxima", cls: "danger" },
     priority: true,
     defaults: {
-      status: "Etapa: desmembramento e remembramento dos lotes 15 e 16. Pendente com o Fernando (secretário da prefeitura), corrigindo as coordenadas do terreno e o nome do vendedor (erro de topografia). Por causa desse atraso, o alvará de construção está sendo pedido depois do início da obra, fora da ordem normal.",
+      status: "Kauã registrou em 13/08/2026: A partir de amanhã: Kauã vai à prefeitura falar com o Fernando, e ao cartório falar com a Isabelle pra saber se ela já conversou com o Fernando.",
       cobranca: "Kauã está cobrando o Fernando. Casas já em fase final de construção — é o terreno mais urgente.",
       etapas: [
         "Correção da topografia dos lotes 15 e 16 (coordenadas e nome do vendedor) com o Fernando",
@@ -1090,6 +1091,7 @@ async function deleteDiarioEntry(id, entryId) {
 
 const adminToggleBtn = document.getElementById("admin-toggle");
 const adminStateEl = document.getElementById("admin-state");
+const resyncBtn = document.getElementById("resync-status-btn");
 
 adminToggleBtn.addEventListener("click", () => {
   if (isAdmin) {
@@ -1097,6 +1099,7 @@ adminToggleBtn.addEventListener("click", () => {
     adminToggleBtn.textContent = "Entrar como administrador";
     adminToggleBtn.classList.remove("active");
     adminStateEl.textContent = "Modo padrão: qualquer pessoa pode adicionar registros no diário. Status e pendências só o administrador edita.";
+    resyncBtn.style.display = "none";
   } else {
     const pin = window.prompt("PIN de administrador:");
     if (pin === null) return;
@@ -1105,6 +1108,7 @@ adminToggleBtn.addEventListener("click", () => {
       adminToggleBtn.textContent = "Sair do modo administrador";
       adminToggleBtn.classList.add("active");
       adminStateEl.textContent = "Modo administrador ativo: você pode editar status/pendências, editar e excluir registros do diário.";
+      resyncBtn.style.display = "inline-block";
     } else {
       globalStatus.textContent = "PIN incorreto.";
       if (saveTimer) clearTimeout(saveTimer);
@@ -1118,6 +1122,36 @@ adminToggleBtn.addEventListener("click", () => {
     renderDiario(card, t.id);
     renderNegStatus(card, t.id);
   });
+});
+
+resyncBtn.addEventListener("click", async () => {
+  globalStatus.textContent = "Atualizando status a partir do último registro de cada card...";
+  let changed = 0;
+  try {
+    const existing = await apiGet().catch(() => null);
+    const all = existing && existing.value ? JSON.parse(existing.value) : {};
+    TERRENOS.forEach(t => {
+      const card = grid.querySelector(`[data-id="${t.id}"]`);
+      const summary = syncStatusFromDiario(card, t.id);
+      if (summary) {
+        all[t.id] = all[t.id] || {};
+        all[t.id].status = summary;
+        changed++;
+      }
+    });
+    if (changed) {
+      const result = await apiSet(JSON.stringify(all));
+      globalStatus.textContent = result
+        ? `Status atualizado em ${changed} card(s) a partir do diário.`
+        : "Não foi possível salvar as atualizações.";
+    } else {
+      globalStatus.textContent = "Nenhum card tem registros no diário ainda.";
+    }
+  } catch (err) {
+    globalStatus.textContent = "Não foi possível atualizar. Tente novamente.";
+  }
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 4000);
 });
 
 grid.addEventListener("change", (e) => {
