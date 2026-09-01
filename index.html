@@ -183,10 +183,10 @@
   .stepper li.current { color: var(--text); font-weight: 700; }
   .stepper li.current .dot { background: var(--warn-text); border-color: var(--warn-text); }
 
-  /* Timeline (diário de acompanhamento) — layout horizontal */
+  /* Timeline (diário de acompanhamento) — layout horizontal, clique na data pra expandir */
   .diario-list {
     list-style: none; margin: 30px 0 0; padding: 6px 6px 18px;
-    display: flex; flex-direction: row; gap: 18px;
+    display: flex; flex-direction: row; gap: 14px; align-items: flex-start;
     overflow-x: auto; position: relative;
   }
   .diario-list::before {
@@ -194,25 +194,38 @@
     background: var(--border);
   }
   .diario-entry {
-    position: relative; flex: 0 0 260px; width: 260px; padding-top: 22px; font-size: 12.5px;
+    position: relative; flex: 0 0 168px; width: 168px; padding-top: 22px; font-size: 12.5px;
+    transition: flex-basis 0.15s ease, width 0.15s ease;
   }
+  .diario-entry:has(.diario-entry-body.open) { flex: 0 0 260px; width: 260px; }
   .diario-entry::before {
     content: ""; position: absolute; left: 0; top: 4px; width: 13px; height: 13px;
     border-radius: 50%; background: var(--dot-color, var(--accent));
     box-shadow: 0 0 0 4px var(--bg-0), 0 0 10px 1px var(--dot-color, var(--accent));
   }
-  .diario-entry-body {
-    background: rgba(255,255,255,0.035); border: 1px solid var(--border); border-radius: 12px;
-    padding: 10px 12px; height: 100%;
+  .diario-date-btn {
+    display: flex; align-items: center; gap: 7px; width: 100%;
+    font-family: var(--font); font-size: 12px; color: var(--text); cursor: pointer;
+    background: rgba(255,255,255,0.035); border: 1px solid var(--border); border-radius: 10px;
+    padding: 7px 10px; text-align: left;
   }
-  .diario-entry-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
-  .diario-date { font-family: var(--font-mono); color: var(--text-muted); font-size: 10.5px; }
+  .diario-date-btn:hover { border-color: var(--dot-color, var(--accent)); }
+  .diario-date-btn[aria-expanded="true"] { border-color: var(--dot-color, var(--accent)); background: rgba(255,255,255,0.06); }
+  .diario-date { font-family: var(--font-mono); color: var(--text); font-size: 11px; font-weight: 600; }
+  .diario-chev { margin-left: auto; color: var(--text-muted); font-size: 12px; font-family: var(--font-mono); }
   .diario-who {
-    font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px;
-    background: var(--ok-bg); color: var(--ok-text); letter-spacing: 0.02em;
+    font-size: 9.5px; font-weight: 700; padding: 1px 8px; border-radius: 20px;
+    background: var(--ok-bg); color: var(--ok-text); letter-spacing: 0.02em; white-space: nowrap;
   }
   .diario-who.jp { background: var(--warn-bg); color: var(--warn-text); }
   .diario-who.luiz { background: var(--danger-bg); color: var(--danger-text); }
+  .diario-entry-body {
+    display: none; margin-top: 8px;
+    background: rgba(255,255,255,0.035); border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .diario-entry-body.open { display: block; }
+  .diario-entry-actions { display: flex; justify-content: flex-end; gap: 4px; margin-bottom: 6px; }
   .diario-nota { color: var(--text-secondary); line-height: 1.5; margin: 0; }
   .diario-empty { font-size: 12px; color: var(--text-muted); font-style: italic; padding-left: 6px; }
   .prazo-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
@@ -338,7 +351,7 @@
   }
   .del-entry-btn:hover { text-decoration: underline; }
   .diario-entry-editing .diario-entry-body { border-color: var(--accent); }
-  .diario-entry.diario-entry-editing { flex-basis: 340px; width: 340px; }
+  .diario-entry.diario-entry-editing { flex-basis: 340px !important; width: 340px !important; }
 </style>
 </head>
 <body>
@@ -707,6 +720,7 @@ function applyFilter() {
 }
 
 const DOT_COLOR = { kaua: "var(--ok-text)", jp: "var(--warn-text)", luiz: "var(--danger-text)", outro: "var(--text-muted)" };
+const expandedEntries = {};
 
 function renderDiario(card, id) {
   const entries = (diarioState[id] || []).slice().sort((a, b) => (a.data > b.data ? 1 : -1));
@@ -715,6 +729,7 @@ function renderDiario(card, id) {
     listEl.innerHTML = `<li class="diario-empty">Nenhum registro ainda.</li>`;
     return;
   }
+  const expandedSet = expandedEntries[id] || (expandedEntries[id] = new Set());
   const today = todayISO();
   listEl.innerHTML = entries.map(e => {
     const dotColor = DOT_COLOR[e.responsavel] || DOT_COLOR.outro;
@@ -722,7 +737,7 @@ function renderDiario(card, id) {
       const prazosArr = Array.isArray(e.prazos) ? e.prazos.filter(Boolean) : (e.prazo ? [e.prazo] : []);
       return `
         <li class="diario-entry diario-entry-editing" style="--dot-color:${dotColor}">
-        <div class="diario-entry-body">
+        <div class="diario-entry-body open">
           <div class="diario-form-row">
             <div>
               <label class="diario-form-label">Responsável</label>
@@ -776,14 +791,16 @@ function renderDiario(card, id) {
       ? `<button class="del-entry-btn" data-editentry="${id}" data-entryid="${e.id}" type="button" style="color:var(--accent)">Editar</button>
          <button class="del-entry-btn" data-delentry="${id}" data-entryid="${e.id}" type="button">Excluir</button>`
       : "";
+    const isOpen = expandedSet.has(e.id);
     return `
       <li class="diario-entry" style="--dot-color:${dotColor}">
-        <div class="diario-entry-body">
-          <div class="diario-entry-head">
-            <span class="diario-who ${whoCls}">${whoLabel}</span>
-            <span class="diario-date">${formatDatePt(e.data)}</span>
-            ${adminBtns}
-          </div>
+        <button class="diario-date-btn" data-toggleentry="${id}" data-entryid="${e.id}" type="button" aria-expanded="${isOpen}">
+          <span class="diario-date">${formatDatePt(e.data)}</span>
+          <span class="diario-who ${whoCls}">${whoLabel}</span>
+          <span class="diario-chev">${isOpen ? "−" : "+"}</span>
+        </button>
+        <div class="diario-entry-body ${isOpen ? "open" : ""}">
+          ${adminBtns ? `<div class="diario-entry-actions">${adminBtns}</div>` : ""}
           <p class="diario-nota">${e.nota}</p>
           ${prazoHTML}
         </div>
@@ -1059,6 +1076,16 @@ grid.addEventListener("click", (e) => {
     }
     toggleBtn.classList.toggle("open");
     body.classList.toggle("open");
+    return;
+  }
+
+  const dateBtn = e.target.closest("[data-toggleentry]");
+  if (dateBtn) {
+    const tId = dateBtn.getAttribute("data-toggleentry");
+    const eId = dateBtn.getAttribute("data-entryid");
+    const set = expandedEntries[tId] || (expandedEntries[tId] = new Set());
+    if (set.has(eId)) set.delete(eId); else set.add(eId);
+    renderDiario(grid.querySelector(`[data-id="${tId}"]`), tId);
     return;
   }
 
