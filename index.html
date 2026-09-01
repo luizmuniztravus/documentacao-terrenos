@@ -951,6 +951,25 @@ async function saveCard(id) {
   saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 3000);
 }
 
+function latestDiarioSummary(id) {
+  const entries = diarioState[id] || [];
+  if (!entries.length) return null;
+  const latest = entries.slice().sort((a, b) => (a.data > b.data ? 1 : -1)).pop();
+  const who = RESP_LABEL[latest.responsavel] || "Outro";
+  return `${who} registrou em ${formatDatePt(latest.data)}: ${latest.nota}`;
+}
+
+function syncStatusFromDiario(card, id) {
+  const summary = latestDiarioSummary(id);
+  if (!summary) return null;
+  const statusEl = card.querySelector('[data-field="status"]');
+  if (statusEl) {
+    statusEl.value = summary;
+    if (!isAdmin) autosizeLockable(statusEl);
+  }
+  return summary;
+}
+
 async function addDiarioEntry(id) {
   const card = grid.querySelector(`[data-id="${id}"]`);
   const responsavel = card.querySelector('[data-diario-field="responsavel"]').value;
@@ -971,6 +990,7 @@ async function addDiarioEntry(id) {
   diarioState[id] = diarioState[id] || [];
   diarioState[id].push(entry);
   renderDiario(card, id);
+  const statusSummary = syncStatusFromDiario(card, id);
   notaEl.value = "";
   card.querySelector('[data-diario-field="prazo1"]').value = "";
   card.querySelector('[data-diario-field="prazo2"]').value = "";
@@ -981,6 +1001,7 @@ async function addDiarioEntry(id) {
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
     all[id] = all[id] || {};
     all[id].diario = diarioState[id];
+    if (statusSummary) all[id].status = statusSummary;
     const result = await apiSet(JSON.stringify(all));
     globalStatus.textContent = result ? `Registro adicionado: ${card.querySelector(".card-title").textContent}` : "Não foi possível salvar o registro.";
   } catch (err) {
@@ -1030,12 +1051,14 @@ async function saveDiarioEdit(id, entryId) {
 
   editingState[id] = null;
   renderDiario(card, id);
+  const statusSummary = syncStatusFromDiario(card, id);
 
   try {
     const existing = await apiGet().catch(() => null);
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
     all[id] = all[id] || {};
     all[id].diario = diarioState[id];
+    if (statusSummary) all[id].status = statusSummary;
     const result = await apiSet(JSON.stringify(all));
     globalStatus.textContent = result ? "Registro editado." : "Não foi possível salvar a edição.";
   } catch (err) {
@@ -1049,11 +1072,13 @@ async function deleteDiarioEntry(id, entryId) {
   const card = grid.querySelector(`[data-id="${id}"]`);
   diarioState[id] = (diarioState[id] || []).filter(e => e.id !== entryId);
   renderDiario(card, id);
+  const statusSummary = syncStatusFromDiario(card, id);
   try {
     const existing = await apiGet().catch(() => null);
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
     all[id] = all[id] || {};
     all[id].diario = diarioState[id];
+    if (statusSummary) all[id].status = statusSummary;
     await apiSet(JSON.stringify(all));
     globalStatus.textContent = "Registro excluído.";
   } catch (err) {
