@@ -101,11 +101,18 @@
   .resp-badge.luiz { background: var(--danger-bg); color: var(--danger-text); }
   .resp-badge:empty { display: none; }
   .status-preview {
-    font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin: 0 0 14px;
+    font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin: 0 0 6px;
     background: rgba(255,255,255,0.025); border: 1px solid var(--border); border-radius: 10px;
     padding: 9px 11px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-    overflow: hidden;
+    overflow: hidden; cursor: pointer;
   }
+  .status-preview:hover { border-color: var(--border-strong); }
+  .status-preview.expanded { -webkit-line-clamp: unset; }
+  .status-preview-toggle {
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); background: transparent;
+    border: none; cursor: pointer; padding: 0; margin: 0 0 14px; display: none;
+  }
+  .status-preview-toggle.visible { display: inline-block; }
   .card-heading { display: flex; align-items: center; gap: 11px; }
   .avatar {
     width: 38px; height: 38px; border-radius: 11px; flex: none;
@@ -471,7 +478,7 @@
 
   <div class="grid" id="grid"></div>
   <p style="text-align:center; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); margin-top: 40px;">
-    versão do painel: 2026-09-02.9
+    versão do painel: 2026-09-02.10
   </p>
 </div>
 
@@ -683,6 +690,7 @@ function cardHTML(t) {
 
       <p class="field-label field-label-prominent">Status / pendência atual</p>
       <p class="status-preview" data-statuspreview="${t.id}"></p>
+      <button class="status-preview-toggle" data-statustoggle="${t.id}" type="button">Ver mais</button>
 
       <button class="expand-btn" data-toggle="details-${t.id}" type="button">
         <span class="chev">›</span> Ver detalhes completos
@@ -1231,6 +1239,26 @@ function renderStatusPreview(card, id) {
   if (!el) return;
   const statusEl = card.querySelector('[data-field="status"]');
   el.textContent = statusEl ? statusEl.value : "";
+  el.classList.remove("expanded");
+  updateStatusToggleVisibility(card, id);
+}
+
+function updateStatusToggleVisibility(card, id) {
+  const el = card.querySelector(`[data-statuspreview="${id}"]`);
+  const toggleBtn = card.querySelector(`[data-statustoggle="${id}"]`);
+  if (!el || !toggleBtn) return;
+  // Só mostra o botão "Ver mais" se o texto realmente estiver sendo cortado.
+  const isTruncated = !el.classList.contains("expanded") && el.scrollHeight - el.clientHeight > 2;
+  const isExpanded = el.classList.contains("expanded");
+  toggleBtn.classList.toggle("visible", isTruncated || isExpanded);
+  toggleBtn.textContent = isExpanded ? "Ver menos" : "Ver mais";
+}
+
+function toggleStatusPreview(card, id) {
+  const el = card.querySelector(`[data-statuspreview="${id}"]`);
+  if (!el) return;
+  el.classList.toggle("expanded");
+  updateStatusToggleVisibility(card, id);
 }
 
 function latestDiarioEntryOf(id) {
@@ -1519,6 +1547,13 @@ grid.addEventListener("click", (e) => {
     }
     toggleBtn.classList.toggle("open");
     body.classList.toggle("open");
+    return;
+  }
+
+  const statusPreviewClick = e.target.closest("[data-statuspreview], [data-statustoggle]");
+  if (statusPreviewClick) {
+    const tId = statusPreviewClick.getAttribute("data-statuspreview") || statusPreviewClick.getAttribute("data-statustoggle");
+    toggleStatusPreview(grid.querySelector(`[data-id="${tId}"]`), tId);
     return;
   }
 
