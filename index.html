@@ -451,7 +451,7 @@
 
   <div class="grid" id="grid"></div>
   <p style="text-align:center; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); margin-top: 40px;">
-    versão do painel: 2026-09-02.4
+    versão do painel: 2026-09-02.5
   </p>
 </div>
 
@@ -1114,15 +1114,42 @@ function ensureDataReady() {
 async function saveCard(id) {
   if (!ensureDataReady()) return;
   const card = grid.querySelector(`[data-id="${id}"]`);
-  const status = card.querySelector('[data-field="status"]').value;
   const cobranca = card.querySelector('[data-field="cobranca"]').value;
-  const data = card.querySelector('[data-field="data"]').value;
+  let status = card.querySelector('[data-field="status"]').value;
+  let data = card.querySelector('[data-field="data"]').value;
 
   try {
     const existing = await apiGet().catch(() => null);
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
-    all[id] = { ...(all[id] || {}), status, cobranca, data, diario: diarioState[id] || [] };
+
+    // O servidor é a fonte da verdade para o diário: se ele tiver mais registros do que essa aba
+    // conhece (por exemplo, outra pessoa salvou algo enquanto esta aba estava aberta), usamos o
+    // diário do servidor em vez do local, para nunca perder registros.
+    const freshDiario = Array.isArray(all[id] && all[id].diario) ? all[id].diario : [];
+    const localDiario = diarioState[id] || [];
+    const diarioToSave = freshDiario.length > localDiario.length ? freshDiario : localDiario;
+    if (diarioToSave === freshDiario) diarioState[id] = freshDiario;
+
+    // Status/última atualização sempre refletem o registro mais recente que existir — impede que
+    // uma aba desatualizada "volte no tempo" essas duas informações.
+    if (diarioToSave.length) {
+      const latest = diarioToSave.slice().sort((a, b) => (a.data > b.data ? 1 : -1)).pop();
+      if (!data || latest.data > data) {
+        const who = RESP_LABEL[latest.responsavel] || "Outro";
+        status = `${who} registrou em ${formatDatePt(latest.data)}: ${latest.nota}`;
+        data = latest.data;
+      }
+    }
+
+    all[id] = { ...(all[id] || {}), status, cobranca, data, diario: diarioToSave };
     const result = await apiSet(JSON.stringify(all));
+
+    card.querySelector('[data-field="status"]').value = status;
+    card.querySelector('[data-field="data"]').value = data;
+    if (!isAdmin) autosizeLockable(card.querySelector('[data-field="status"]'));
+    renderDiario(card, id);
+    renderPrazoBadge(card, id);
+
     const lastSavedEl = card.querySelector(`[data-lastsaved="${id}"]`);
     if (result) {
       lastSavedEl.textContent = `Atualizado em ${formatDatePt(data)}`;
