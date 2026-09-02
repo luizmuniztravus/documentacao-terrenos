@@ -92,6 +92,20 @@
   }
   .card.card-inactive:hover { opacity: 0.85; filter: saturate(0.85); }
   .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 2px; }
+  .card-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex: none; }
+  .resp-badge {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.03em; padding: 2px 9px; border-radius: 20px;
+    background: var(--ok-bg); color: var(--ok-text); white-space: nowrap;
+  }
+  .resp-badge.jp { background: var(--warn-bg); color: var(--warn-text); }
+  .resp-badge.luiz { background: var(--danger-bg); color: var(--danger-text); }
+  .resp-badge:empty { display: none; }
+  .status-preview {
+    font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin: 0 0 14px;
+    background: rgba(255,255,255,0.025); border: 1px solid var(--border); border-radius: 10px;
+    padding: 9px 11px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
   .card-heading { display: flex; align-items: center; gap: 11px; }
   .avatar {
     width: 38px; height: 38px; border-radius: 11px; flex: none;
@@ -102,9 +116,11 @@
   }
   .card-title { font-size: 16.5px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
   .meta {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 3px 12px;
+    display: flex; flex-direction: column; gap: 4px;
     font-size: 12px; color: var(--text-secondary); margin: 3px 0 12px; padding-left: 49px;
   }
+  .meta-location-row { display: flex; }
+  .meta-roles-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
   .meta-location {
     display: inline-flex; align-items: center; gap: 4px;
     color: var(--text); font-weight: 600;
@@ -377,9 +393,10 @@
   }
   .detail-title { font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.01em; }
   .detail-meta {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px;
+    display: flex; flex-direction: column; gap: 5px;
     font-size: 13.5px; color: var(--text-secondary); margin: 5px 0 0;
   }
+  .detail-meta .meta-roles-row { gap: 5px 14px; }
   .detail-meta .meta-location { font-size: 14px; }
   .detail-meta .meta-location svg { width: 13px; height: 13px; }
   .detail-meta .meta-role-label { font-size: 9.5px; }
@@ -454,7 +471,7 @@
 
   <div class="grid" id="grid"></div>
   <p style="text-align:center; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); margin-top: 40px;">
-    versão do painel: 2026-09-02.8
+    versão do painel: 2026-09-02.9
   </p>
 </div>
 
@@ -641,8 +658,8 @@ function metaHTML(t) {
     .map(r => `<span class="meta-role"><span class="meta-role-label">${r.label}</span>${r.value}</span>`)
     .join("");
   return `
-    <span class="meta-location">${PIN_SVG}${t.location}</span>
-    ${roles}
+    <div class="meta-location-row"><span class="meta-location">${PIN_SVG}${t.location}</span></div>
+    ${roles ? `<div class="meta-roles-row">${roles}</div>` : ""}
   `;
 }
 
@@ -654,12 +671,18 @@ function cardHTML(t) {
           <div class="avatar">${initials(t.nome)}</div>
           <p class="card-title">${t.nome}</p>
         </div>
-        <span class="badge ${t.badge.cls}" data-badge="${t.id}">${t.badge.text}</span>
+        <div class="card-badges">
+          <span class="badge ${t.badge.cls}" data-badge="${t.id}">${t.badge.text}</span>
+          <span class="resp-badge" data-respbadge="${t.id}"></span>
+        </div>
       </div>
       <div class="meta">${metaHTML(t)}</div>
 
       <div class="neg-row" data-negrow="${t.id}"></div>
       <div class="prazo-row" data-prazorow="${t.id}"></div>
+
+      <p class="field-label field-label-prominent">Status / pendência atual</p>
+      <p class="status-preview" data-statuspreview="${t.id}"></p>
 
       <button class="expand-btn" data-toggle="details-${t.id}" type="button">
         <span class="chev">›</span> Ver detalhes completos
@@ -1057,6 +1080,8 @@ TERRENOS.forEach(t => {
     diarioState[t.id] = ensureIds(t.defaults.diario ? t.defaults.diario.slice() : []);
     renderDiario(card, t.id);
     renderPrazoBadge(card, t.id);
+    renderRespBadge(card, t.id);
+    renderStatusPreview(card, t.id);
     negStatusState[t.id] = t.defaults.negociacao || "andamento";
     renderNegStatus(card, t.id);
   } catch (cardErr) {
@@ -1086,6 +1111,8 @@ async function loadAll() {
           diarioState[t.id] = ensureIds(Array.isArray(s.diario) ? s.diario : (t.defaults.diario ? t.defaults.diario.slice() : []));
           renderDiario(card, t.id);
           renderPrazoBadge(card, t.id);
+          renderRespBadge(card, t.id);
+          renderStatusPreview(card, t.id);
           negStatusState[t.id] = s.negociacao ?? t.defaults.negociacao ?? "andamento";
           renderNegStatus(card, t.id);
           const lastSavedEl = card.querySelector(`[data-lastsaved="${t.id}"]`);
@@ -1152,6 +1179,8 @@ async function saveCard(id) {
     if (!isAdmin) autosizeLockable(card.querySelector('[data-field="status"]'));
     renderDiario(card, id);
     renderPrazoBadge(card, id);
+    renderRespBadge(card, id);
+    renderStatusPreview(card, id);
 
     const lastSavedEl = card.querySelector(`[data-lastsaved="${id}"]`);
     if (result) {
@@ -1184,6 +1213,24 @@ function renderPrazoBadge(card, id) {
     const isAlert = deadline <= today;
     el.innerHTML = `<span class="prazo-badge ${isAlert ? "alert" : ""}">Prazo prometido: ${formatDatePt(deadline)}</span>`;
   });
+}
+
+function renderRespBadge(card, id) {
+  const entries = (diarioState[id] || []).slice().sort((a, b) => (a.data < b.data ? 1 : -1));
+  const el = card.querySelector(`[data-respbadge="${id}"]`);
+  if (!el) return;
+  if (!entries.length) { el.textContent = ""; el.className = "resp-badge"; return; }
+  const latest = entries[0];
+  const cls = latest.responsavel === "jp" ? "jp" : (latest.responsavel === "luiz" ? "luiz" : "");
+  el.className = `resp-badge ${cls}`;
+  el.textContent = RESP_LABEL[latest.responsavel] || "Outro";
+}
+
+function renderStatusPreview(card, id) {
+  const el = card.querySelector(`[data-statuspreview="${id}"]`);
+  if (!el) return;
+  const statusEl = card.querySelector('[data-field="status"]');
+  el.textContent = statusEl ? statusEl.value : "";
 }
 
 function latestDiarioEntryOf(id) {
@@ -1241,7 +1288,10 @@ async function addDiarioEntry(id) {
   diarioState[id].push(entry);
   renderDiario(card, id);
   renderPrazoBadge(card, id);
+  renderRespBadge(card, id);
+  renderStatusPreview(card, id);
   const statusSummary = syncStatusFromDiario(card, id);
+  renderStatusPreview(card, id);
   notaEl.value = "";
   card.querySelector('[data-diario-field="prazo1"]').value = "";
   card.querySelector('[data-diario-field="prazo2"]').value = "";
@@ -1304,7 +1354,10 @@ async function saveDiarioEdit(id, entryId) {
   editingState[id] = null;
   renderDiario(card, id);
   renderPrazoBadge(card, id);
+  renderRespBadge(card, id);
+  renderStatusPreview(card, id);
   const statusSummary = syncStatusFromDiario(card, id);
+  renderStatusPreview(card, id);
 
   try {
     const existing = await apiGet().catch(() => null);
@@ -1327,7 +1380,10 @@ async function deleteDiarioEntry(id, entryId) {
   diarioState[id] = (diarioState[id] || []).filter(e => e.id !== entryId);
   renderDiario(card, id);
   renderPrazoBadge(card, id);
+  renderRespBadge(card, id);
+  renderStatusPreview(card, id);
   const statusSummary = syncStatusFromDiario(card, id);
+  renderStatusPreview(card, id);
   try {
     const existing = await apiGet().catch(() => null);
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
@@ -1388,7 +1444,10 @@ resyncBtn.addEventListener("click", async () => {
     TERRENOS.forEach(t => {
       const card = grid.querySelector(`[data-id="${t.id}"]`);
       const summary = syncStatusFromDiario(card, t.id);
+      renderStatusPreview(card, t.id);
       renderPrazoBadge(card, t.id);
+      renderRespBadge(card, t.id);
+      renderStatusPreview(card, t.id);
       if (summary) {
         all[t.id] = all[t.id] || {};
         all[t.id].status = summary.summary;
