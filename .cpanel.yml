@@ -3,3 +3,4 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home1/thesm705/travuscapital.com.br/docterrenos/
     - /bin/cp -R * $DEPLOYPATH
+    - /bin/cp -f .htaccess $DEPLOYPATH 2>/dev/null || true

@@ -1,0 +1,10 @@
+# Nunca deixa o navegador (ou qualquer cache intermediario do host) guardar
+# uma versao antiga do painel. Sem isso, um deploy novo pode nao aparecer
+# na tela de quem já visitou o site antes.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|php)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+  </FilesMatch>
+</IfModule>
