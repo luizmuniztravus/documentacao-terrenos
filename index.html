@@ -83,6 +83,11 @@
     border-color: rgba(255, 107, 107, 0.35);
     box-shadow: 0 20px 44px -20px rgba(255, 90, 90, 0.28), 0 0 0 1px rgba(255,255,255,0.02) inset;
   }
+  .card.card-inactive {
+    opacity: 0.5; filter: saturate(0.6);
+    transition: opacity 0.15s ease, filter 0.15s ease;
+  }
+  .card.card-inactive:hover { opacity: 0.85; filter: saturate(0.85); }
   .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 2px; }
   .card-heading { display: flex; align-items: center; gap: 11px; }
   .avatar {
@@ -389,7 +394,6 @@
 <div class="wrap">
   <header>
     <h1>Painel de documentação — Terrenos Carvalho</h1>
-    <p>Atualize a posição diária que o Kauã te passa. Cada card salva sozinho no seu navegador.</p>
     <div class="status-banner" id="global-status"></div>
     <div class="admin-row">
       <span class="admin-state" id="admin-state">Modo padrão: qualquer pessoa pode adicionar registros no diário. Status e pendências só o administrador edita.</span>
@@ -721,6 +725,7 @@ function renderNegStatus(card, id) {
   const row = card.querySelector(`[data-negrow="${id}"]`);
   if (!row) return;
   card.dataset.negstatus = status;
+  card.classList.toggle("card-inactive", status === "encerrada");
 
   const opts = ["andamento", "finalizado", "encerrada"]
     .map(v => `<option value="${v}" ${v === status ? "selected" : ""}>${NEG_LABEL[v]}</option>`)
@@ -776,6 +781,7 @@ function applyFilter() {
   grid.querySelectorAll(".card").forEach(card => {
     const status = card.dataset.negstatus || "andamento";
     card.style.display = (currentFilter === "todos" || status === currentFilter) ? "" : "none";
+    card.style.order = status === "encerrada" ? "1" : "0";
   });
 }
 
