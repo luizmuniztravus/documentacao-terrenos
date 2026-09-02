@@ -727,7 +727,11 @@ function ensureIds(entries) {
 }
 
 function normalizeEtapas(raw) {
-  return (raw || []).map(e => (typeof e === "string" ? { label: e, data: null } : { label: e.label, data: e.data || null }));
+  if (typeof raw === "string") {
+    raw = raw.split("\n").map(s => s.trim()).filter(Boolean);
+  }
+  if (!Array.isArray(raw)) return [];
+  return raw.map(e => (typeof e === "string" ? { label: e, data: null } : { label: e.label, data: e.data || null }));
 }
 
 const etapasState = {};
@@ -1002,15 +1006,19 @@ function renderDiario(card, id) {
 }
 
 TERRENOS.forEach(t => {
-  const card = grid.querySelector(`[data-id="${t.id}"]`);
-  etapasState[t.id] = normalizeEtapas(t.defaults.etapas);
-  etapaAtualState[t.id] = t.defaults.etapaAtual || 0;
-  renderEtapasList(card, t.id);
-  diarioState[t.id] = ensureIds(t.defaults.diario ? t.defaults.diario.slice() : []);
-  renderDiario(card, t.id);
-  renderPrazoBadge(card, t.id);
-  negStatusState[t.id] = t.defaults.negociacao || "andamento";
-  renderNegStatus(card, t.id);
+  try {
+    const card = grid.querySelector(`[data-id="${t.id}"]`);
+    etapasState[t.id] = normalizeEtapas(t.defaults.etapas);
+    etapaAtualState[t.id] = t.defaults.etapaAtual || 0;
+    renderEtapasList(card, t.id);
+    diarioState[t.id] = ensureIds(t.defaults.diario ? t.defaults.diario.slice() : []);
+    renderDiario(card, t.id);
+    renderPrazoBadge(card, t.id);
+    negStatusState[t.id] = t.defaults.negociacao || "andamento";
+    renderNegStatus(card, t.id);
+  } catch (cardErr) {
+    console.error(`Falha ao renderizar o card padrão de "${t.id}":`, cardErr);
+  }
 });
 applyLockState();
 applyFilter();
@@ -1024,20 +1032,25 @@ async function loadAll() {
       TERRENOS.forEach(t => {
         const s = saved[t.id];
         if (!s) return;
-        const card = grid.querySelector(`[data-id="${t.id}"]`);
-        card.querySelector('[data-field="status"]').value = s.status ?? t.defaults.status;
-        card.querySelector('[data-field="cobranca"]').value = s.cobranca ?? t.defaults.cobranca;
-        card.querySelector('[data-field="data"]').value = s.data ?? todayISO();
-        etapasState[t.id] = normalizeEtapas(s.etapas ?? t.defaults.etapas);
-        etapaAtualState[t.id] = s.etapaAtual ?? t.defaults.etapaAtual ?? 0;
-        renderEtapasList(card, t.id);
-        diarioState[t.id] = ensureIds(Array.isArray(s.diario) ? s.diario : (t.defaults.diario ? t.defaults.diario.slice() : []));
-        renderDiario(card, t.id);
-        renderPrazoBadge(card, t.id);
-        negStatusState[t.id] = s.negociacao ?? t.defaults.negociacao ?? "andamento";
-        renderNegStatus(card, t.id);
-        const lastSavedEl = card.querySelector(`[data-lastsaved="${t.id}"]`);
-        if (s.data) lastSavedEl.textContent = `Atualizado em ${formatDatePt(s.data)}`;
+        try {
+          const card = grid.querySelector(`[data-id="${t.id}"]`);
+          card.querySelector('[data-field="status"]').value = s.status ?? t.defaults.status;
+          card.querySelector('[data-field="cobranca"]').value = s.cobranca ?? t.defaults.cobranca;
+          card.querySelector('[data-field="data"]').value = s.data ?? todayISO();
+          etapasState[t.id] = normalizeEtapas(s.etapas ?? t.defaults.etapas);
+          etapaAtualState[t.id] = Number(s.etapaAtual ?? t.defaults.etapaAtual ?? 0) || 0;
+          renderEtapasList(card, t.id);
+          diarioState[t.id] = ensureIds(Array.isArray(s.diario) ? s.diario : (t.defaults.diario ? t.defaults.diario.slice() : []));
+          renderDiario(card, t.id);
+          renderPrazoBadge(card, t.id);
+          negStatusState[t.id] = s.negociacao ?? t.defaults.negociacao ?? "andamento";
+          renderNegStatus(card, t.id);
+          const lastSavedEl = card.querySelector(`[data-lastsaved="${t.id}"]`);
+          if (s.data) lastSavedEl.textContent = `Atualizado em ${formatDatePt(s.data)}`;
+        } catch (cardErr) {
+          console.error(`Falha ao carregar dados salvos do terreno "${t.id}":`, cardErr);
+          globalStatus.textContent = `⚠ Não consegui carregar corretamente os dados de "${t.nome}". Os outros cards carregaram normalmente — avise o suporte.`;
+        }
       });
     }
     applyFilter();
