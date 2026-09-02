@@ -586,6 +586,7 @@ async function apiSet(valueString) {
   return { key: STORAGE_KEY, value: valueString };
 }
 let isAdmin = false;
+let dataReady = false; // só true depois que o histórico salvo no servidor foi confirmado carregado
 let saveTimer = null;
 
 function todayISO() {
@@ -759,6 +760,7 @@ function renderEtapasList(card, id) {
 }
 
 async function persistEtapas(id) {
+  if (!ensureDataReady()) return;
   try {
     const existing = await apiGet().catch(() => null);
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
@@ -881,6 +883,7 @@ function syncBadge(card, id, status) {
 }
 
 async function setNegStatus(id, value) {
+  if (!ensureDataReady()) return;
   negStatusState[id] = value;
   const card = grid.querySelector(`[data-id="${id}"]`);
   renderNegStatus(card, id);
@@ -1039,13 +1042,24 @@ async function loadAll() {
     }
     applyFilter();
     globalStatus.textContent = "";
+    dataReady = true;
   } catch (err) {
-    globalStatus.textContent = "Nenhum dado salvo ainda — preencha e clique em salvar.";
+    dataReady = false;
+    globalStatus.textContent = "⚠ Não foi possível carregar os dados salvos. Para proteger o histórico, edições estão bloqueadas — recarregue a página antes de continuar.";
   }
   applyLockState();
 }
 
+function ensureDataReady() {
+  if (dataReady) return true;
+  globalStatus.textContent = "⚠ Os dados salvos ainda não carregaram corretamente. Recarregue a página antes de editar, para não sobrescrever o histórico.";
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 5000);
+  return false;
+}
+
 async function saveCard(id) {
+  if (!ensureDataReady()) return;
   const card = grid.querySelector(`[data-id="${id}"]`);
   const status = card.querySelector('[data-field="status"]').value;
   const cobranca = card.querySelector('[data-field="cobranca"]').value;
@@ -1109,6 +1123,7 @@ function syncStatusFromDiario(card, id) {
 }
 
 async function addDiarioEntry(id) {
+  if (!ensureDataReady()) return;
   const card = grid.querySelector(`[data-id="${id}"]`);
   const responsavel = card.querySelector('[data-diario-field="responsavel"]').value;
   const data = card.querySelector('[data-diario-field="data"]').value || todayISO();
@@ -1163,6 +1178,7 @@ function cancelEditDiarioEntry(id) {
 }
 
 async function saveDiarioEdit(id, entryId) {
+  if (!ensureDataReady()) return;
   const card = grid.querySelector(`[data-id="${id}"]`);
   const li = card.querySelector(`[data-saveedit="${id}"]`).closest("li");
   const responsavel = li.querySelector('[data-edit-field="responsavel"]').value;
@@ -1209,6 +1225,7 @@ async function saveDiarioEdit(id, entryId) {
 }
 
 async function deleteDiarioEntry(id, entryId) {
+  if (!ensureDataReady()) return;
   const card = grid.querySelector(`[data-id="${id}"]`);
   diarioState[id] = (diarioState[id] || []).filter(e => e.id !== entryId);
   renderDiario(card, id);
@@ -1265,6 +1282,7 @@ adminToggleBtn.addEventListener("click", () => {
 });
 
 resyncBtn.addEventListener("click", async () => {
+  if (!ensureDataReady()) return;
   globalStatus.textContent = "Atualizando status a partir do último registro de cada card...";
   let changed = 0;
   try {
