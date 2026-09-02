@@ -1,27 +1,9 @@
-# Nunca deixa o navegador (ou qualquer cache intermediario do host, tipo LiteSpeed
-# Cache) guardar uma versao antiga do painel. Sem isso, um deploy novo pode nao
-# aparecer na tela de quem já visitou o site antes.
-
+# Nunca deixa o navegador (ou cache intermediario do host) guardar uma versao
+# antiga do painel apos um novo deploy.
 <IfModule mod_headers.c>
   <FilesMatch "\.(html|php)$">
-    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0, private"
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
-    Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
-    Header set X-LiteSpeed-Cache-Control "no-cache"
-    Header unset ETag
+    Header set Expires "0"
   </FilesMatch>
-  FileETag None
-</IfModule>
-
-<IfModule mod_expires.c>
-  ExpiresActive On
-  <FilesMatch "\.(html|php)$">
-    ExpiresDefault "access minus 1 year"
-  </FilesMatch>
-</IfModule>
-
-# Desliga especificamente o cache de pagina do LiteSpeed (comum em hospedagens cPanel)
-# para esta pasta, caso o modulo esteja disponivel no servidor.
-<IfModule LiteSpeed>
-  CacheLookup off
 </IfModule>
