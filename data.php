@@ -4,6 +4,10 @@
 // POST -> substitui o conteudo salvo pelo corpo da requisicao (JSON)
 
 header('Content-Type: application/json; charset=utf-8');
+// Evita que qualquer camada de cache (navegador, proxy do host, LiteSpeed/CDN) sirva uma versao antiga.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 $file = __DIR__ . '/terrenos-data.json';
 $method = $_SERVER['REQUEST_METHOD'];

@@ -98,7 +98,21 @@
     box-shadow: 0 6px 16px -6px var(--card-accent, var(--accent));
   }
   .card-title { font-size: 16.5px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
-  .meta { font-size: 12px; color: var(--text-secondary); margin: 2px 0 12px; padding-left: 49px; }
+  .meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 3px 12px;
+    font-size: 12px; color: var(--text-secondary); margin: 3px 0 12px; padding-left: 49px;
+  }
+  .meta-location {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: var(--text); font-weight: 600;
+  }
+  .meta-location svg { width: 12px; height: 12px; color: var(--card-accent, var(--accent)); flex: none; }
+  .meta-role { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary); }
+  .meta-role-label {
+    font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-muted); background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 5px;
+  }
   .badge {
     font-size: 10.5px; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
     background: var(--warn-bg); color: var(--warn-text); font-weight: 600;
@@ -359,7 +373,13 @@
     width: 52px; height: 52px; border-radius: 14px; font-size: 19px;
   }
   .detail-title { font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.01em; }
-  .detail-meta { font-size: 13px; color: var(--text-secondary); margin: 3px 0 0; }
+  .detail-meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px;
+    font-size: 13.5px; color: var(--text-secondary); margin: 5px 0 0;
+  }
+  .detail-meta .meta-location { font-size: 14px; }
+  .detail-meta .meta-location svg { width: 13px; height: 13px; }
+  .detail-meta .meta-role-label { font-size: 9.5px; }
   .detail-flag {
     display: flex; align-items: center; gap: 10px;
     margin: 16px 0 22px; padding: 13px 18px; border-radius: 12px;
@@ -441,7 +461,8 @@ const TERRENOS = [
     id: "guajiru",
     nome: "Guajiru",
     accent: "#5B8DEF",
-    meta: "São Miguel do Gostoso · Corretor: Neto Maroto · Proprietário: Sr. Grimaldo",
+    location: "São Miguel do Gostoso",
+    roles: [{ label: "Corretor", value: "Neto Maroto" }, { label: "Proprietário", value: "Sr. Grimaldo" }],
     badge: { text: "Travado no vendedor", cls: "" },
     priority: false,
     defaults: {
@@ -460,7 +481,8 @@ const TERRENOS = [
     id: "uhane",
     nome: "Uhane",
     accent: "#9B7BEF",
-    meta: "São Miguel do Gostoso · Vendedor: Bruno Pacheco",
+    location: "São Miguel do Gostoso",
+    roles: [{ label: "Vendedor", value: "Bruno Pacheco" }],
     badge: { text: "Relação sensível", cls: "" },
     priority: false,
     defaults: {
@@ -475,7 +497,8 @@ const TERRENOS = [
     id: "jobiana",
     nome: "Jobiana",
     accent: "#34D8B0",
-    meta: "Touros · Proprietária/vendedora: Alda Macedo · Advogada: Jacobina",
+    location: "Touros",
+    roles: [{ label: "Proprietária/vendedora", value: "Alda Macedo" }, { label: "Advogada", value: "Jacobina" }],
     badge: { text: "Negociando pagamento", cls: "info" },
     priority: false,
     defaults: {
@@ -510,7 +533,8 @@ const TERRENOS = [
     id: "rua-dos-camaroes",
     nome: "Rua dos Camarões",
     accent: "#FF6B6B",
-    meta: "São Miguel do Gostoso · Vendedor original: Neto Maroto · Vendedora atual: Prefeitura",
+    location: "São Miguel do Gostoso",
+    roles: [{ label: "Vendedor original", value: "Neto Maroto" }, { label: "Vendedora atual", value: "Prefeitura" }],
     badge: { text: "Prioridade máxima", cls: "danger" },
     priority: true,
     defaults: {
@@ -553,7 +577,8 @@ const TERRENOS = [
     id: "lote-santo-cristo",
     nome: "Lote Santo Cristo",
     accent: "#FBBF64",
-    meta: "Localização e vendedor a confirmar",
+    location: "A confirmar",
+    roles: [],
     badge: { text: "Novo cadastro", cls: "info" },
     priority: false,
     defaults: {
@@ -573,7 +598,7 @@ const API_URL = "data.php"; // backend em PHP que grava os dados no servidor (te
 const ADMIN_PIN = "carvalho2026"; // troque por uma senha sua; só quem souber consegue editar/excluir registros
 
 async function apiGet() {
-  const res = await fetch(API_URL, { cache: "no-store" });
+  const res = await fetch(`${API_URL}?_=${Date.now()}`, { cache: "no-store" });
   if (!res.ok) throw new Error("Falha ao carregar dados do servidor.");
   const text = await res.text();
   return { key: STORAGE_KEY, value: text };
@@ -606,6 +631,18 @@ function initials(nome) {
   return nome.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
 }
 
+const PIN_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.3" stroke="currentColor" stroke-width="1.8"/></svg>`;
+
+function metaHTML(t) {
+  const roles = (t.roles || [])
+    .map(r => `<span class="meta-role"><span class="meta-role-label">${r.label}</span>${r.value}</span>`)
+    .join("");
+  return `
+    <span class="meta-location">${PIN_SVG}${t.location}</span>
+    ${roles}
+  `;
+}
+
 function cardHTML(t) {
   return `
     <div class="card ${t.priority ? "priority" : ""}" data-id="${t.id}" style="--card-accent:${t.accent}">
@@ -616,7 +653,7 @@ function cardHTML(t) {
         </div>
         <span class="badge ${t.badge.cls}" data-badge="${t.id}">${t.badge.text}</span>
       </div>
-      <p class="meta">${t.meta}</p>
+      <div class="meta">${metaHTML(t)}</div>
 
       <div class="neg-row" data-negrow="${t.id}"></div>
       <div class="prazo-row" data-prazorow="${t.id}"></div>
@@ -632,7 +669,7 @@ function cardHTML(t) {
             <div class="avatar avatar-lg">${initials(t.nome)}</div>
             <div>
               <h2 class="detail-title">${t.nome}</h2>
-              <p class="detail-meta">${t.meta}</p>
+              <div class="detail-meta">${metaHTML(t)}</div>
             </div>
           </div>
 
