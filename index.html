@@ -163,30 +163,51 @@
   .etapas-body { display: none; margin-top: 12px; }
   .etapas-body.open { display: block; }
   .etapas-edit-label {
-    font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); margin: 8px 0 5px;
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); margin: 8px 0 10px;
   }
-  .etapas-row { display: flex; gap: 10px; align-items: flex-start; }
-  .etapas-row textarea { flex: 1; min-height: 90px; font-size: 12.5px; }
-  .etapa-atual-field { width: 90px; flex: none; }
-  .etapa-atual-field label { display: block; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px; }
-  .etapa-atual-field input {
-    width: 100%; font-family: var(--font-mono); font-size: 13px; text-align: center; color: var(--text);
-    background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 6px;
+  .etapas-list { display: flex; flex-direction: column; gap: 6px; }
+  .etapa-row {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); border-radius: 10px; padding: 4px 6px 4px 4px;
+    background: rgba(255,255,255,0.02);
   }
-  .stepper { list-style: none; margin: 12px 0 0; padding: 0; }
-  .stepper li {
-    display: flex; align-items: flex-start; gap: 11px; font-size: 12.5px;
-    padding: 5px 0; color: var(--text-muted);
+  .etapa-row.done { opacity: 0.75; }
+  .etapa-row.current { border-color: var(--warn-text); background: rgba(251,200,118,0.08); }
+  .etapa-row-btn {
+    flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0;
+    background: transparent; border: none; cursor: pointer; text-align: left; padding: 6px 4px;
+    font-family: var(--font); font-size: 12.5px; color: var(--text-muted);
   }
-  .stepper .dot {
-    width: 15px; height: 15px; border-radius: 50%; flex: none; margin-top: 1px;
+  .etapa-dot {
+    width: 15px; height: 15px; border-radius: 50%; flex: none;
     border: 1.5px solid var(--border-strong); display: flex; align-items: center;
     justify-content: center; font-size: 9px; color: transparent;
   }
-  .stepper li.done { color: var(--text-secondary); text-decoration: line-through; text-decoration-color: var(--border-strong); }
-  .stepper li.done .dot { background: var(--ok-text); border-color: var(--ok-text); color: #06231A; }
-  .stepper li.current { color: var(--text); font-weight: 700; }
-  .stepper li.current .dot { background: var(--warn-text); border-color: var(--warn-text); }
+  .etapa-row.done .etapa-row-btn { color: var(--text-secondary); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+  .etapa-row.done .etapa-dot { background: var(--ok-text); border-color: var(--ok-text); color: #06231A; }
+  .etapa-row.current .etapa-row-btn { color: var(--text); font-weight: 700; }
+  .etapa-row.current .etapa-dot { background: var(--warn-text); border-color: var(--warn-text); }
+  .etapa-label { min-width: 0; overflow-wrap: anywhere; }
+  .etapa-date-input {
+    flex: none; font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 7px;
+    padding: 4px 6px; color-scheme: dark; width: 128px;
+  }
+  .etapa-del-btn {
+    flex: none; font-family: var(--font); font-size: 15px; line-height: 1; color: var(--text-muted);
+    background: transparent; border: none; cursor: pointer; padding: 4px 6px; border-radius: 6px;
+  }
+  .etapa-del-btn:hover { color: var(--danger-text); background: var(--danger-bg); }
+  .etapa-add-row { display: flex; gap: 8px; margin-top: 10px; }
+  .etapa-new-label {
+    flex: 1; font-family: var(--font); font-size: 12.5px; color: var(--text);
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border-strong); border-radius: 8px; padding: 7px 10px;
+  }
+  .etapa-new-date {
+    flex: none; width: 128px; font-family: var(--font-mono); font-size: 12px; color: var(--text);
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border-strong); border-radius: 8px;
+    padding: 7px 8px; color-scheme: dark;
+  }
 
   /* Timeline (diário de acompanhamento) — layout horizontal, clique na data pra expandir */
   .diario-list {
@@ -635,14 +656,12 @@ function cardHTML(t) {
           <span class="chev">›</span> Próximas etapas
         </button>
         <div class="etapas-body" data-etapasbody="${t.id}">
-          <ol class="stepper" data-stepper="${t.id}"></ol>
-          <p class="etapas-edit-label">Editar lista (uma etapa por linha) e marcar qual é a atual</p>
-          <div class="etapas-row">
-            <textarea data-field="etapas">${t.defaults.etapas.join("\n")}</textarea>
-            <div class="etapa-atual-field">
-              <label for="atual-${t.id}">Etapa atual (nº)</label>
-              <input type="text" inputmode="numeric" id="atual-${t.id}" data-field="etapaAtual" value="${t.defaults.etapaAtual}">
-            </div>
+          <p class="etapas-edit-label">Clique numa etapa para marcá-la como a atual. A data ao lado é opcional.</p>
+          <div class="etapas-list" data-etapaslist="${t.id}"></div>
+          <div class="etapa-add-row">
+            <input type="text" class="etapa-new-label" data-etapanewlabel="${t.id}" placeholder="Nova etapa">
+            <input type="date" class="etapa-new-date" data-etapanewdate="${t.id}">
+            <button class="add-btn" data-addetapa="${t.id}" type="button">Adicionar</button>
           </div>
         </div>
 
@@ -706,8 +725,112 @@ function ensureIds(entries) {
   return (entries || []).map(e => (e.id ? e : { ...e, id: makeId() }));
 }
 
-function parseEtapas(raw) {
-  return raw.split("\n").map(s => s.trim()).filter(Boolean);
+function normalizeEtapas(raw) {
+  return (raw || []).map(e => (typeof e === "string" ? { label: e, data: null } : { label: e.label, data: e.data || null }));
+}
+
+const etapasState = {};
+const etapaAtualState = {};
+
+function renderEtapasList(card, id) {
+  const etapas = etapasState[id] || [];
+  const etapaAtual = etapaAtualState[id] || 0;
+  const listEl = card.querySelector(`[data-etapaslist="${id}"]`);
+  if (!listEl) return;
+  if (!etapas.length) {
+    listEl.innerHTML = `<p class="diario-empty">Nenhuma etapa cadastrada ainda.</p>`;
+    return;
+  }
+  listEl.innerHTML = etapas.map((e, i) => {
+    const n = i + 1;
+    const cls = n < etapaAtual ? "done" : (n === etapaAtual ? "current" : "");
+    const mark = n < etapaAtual ? "✓" : "";
+    return `
+      <div class="etapa-row ${cls}">
+        <button class="etapa-row-btn" data-etapasetcurrent="${id}" data-etapaindex="${i}" type="button">
+          <span class="etapa-dot">${mark}</span>
+          <span class="etapa-label">${e.label}</span>
+        </button>
+        <input type="date" class="etapa-date-input" data-etapadatefor="${id}" data-etapaindex="${i}" value="${e.data || ""}">
+        <button class="etapa-del-btn" data-deletapa="${id}" data-etapaindex="${i}" type="button" title="Excluir etapa">×</button>
+      </div>
+    `;
+  }).join("");
+}
+
+async function persistEtapas(id) {
+  try {
+    const existing = await apiGet().catch(() => null);
+    const all = existing && existing.value ? JSON.parse(existing.value) : {};
+    all[id] = all[id] || {};
+    all[id].etapas = etapasState[id] || [];
+    all[id].etapaAtual = etapaAtualState[id] || 0;
+    await apiSet(JSON.stringify(all));
+  } catch (err) {
+    globalStatus.textContent = "Não foi possível salvar a etapa.";
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 3000);
+  }
+}
+
+function setEtapaAtual(id, index) {
+  const card = grid.querySelector(`[data-id="${id}"]`);
+  etapaAtualState[id] = index + 1;
+  renderEtapasList(card, id);
+  persistEtapas(id);
+}
+
+function setEtapaDate(id, index, value) {
+  const card = grid.querySelector(`[data-id="${id}"]`);
+  if (!etapasState[id] || !etapasState[id][index]) return;
+  etapasState[id][index].data = value || null;
+  persistEtapas(id);
+}
+
+function deleteEtapa(id, index) {
+  const card = grid.querySelector(`[data-id="${id}"]`);
+  if (!etapasState[id]) return;
+  etapasState[id].splice(index, 1);
+  const n = index + 1;
+  if (etapaAtualState[id] > n) etapaAtualState[id] -= 1;
+  else if (etapaAtualState[id] === n) etapaAtualState[id] = Math.min(etapaAtualState[id], etapasState[id].length);
+  renderEtapasList(card, id);
+  persistEtapas(id);
+}
+
+function addEtapa(id) {
+  const card = grid.querySelector(`[data-id="${id}"]`);
+  const labelEl = card.querySelector(`[data-etapanewlabel="${id}"]`);
+  const dateEl = card.querySelector(`[data-etapanewdate="${id}"]`);
+  const label = labelEl.value.trim();
+  if (!label) {
+    globalStatus.textContent = "Escreva o nome da etapa antes de adicionar.";
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { globalStatus.textContent = ""; }, 3000);
+    return;
+  }
+  etapasState[id] = etapasState[id] || [];
+  etapasState[id].push({ label, data: dateEl.value || null });
+  labelEl.value = "";
+  dateEl.value = "";
+  renderEtapasList(card, id);
+  persistEtapas(id);
+}
+
+grid.innerHTML = TERRENOS.map(cardHTML).join("");
+
+function autosizeLockable(el) {
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
+
+function applyLockState() {
+  grid.querySelectorAll("textarea.lockable").forEach(el => {
+    el.readOnly = !isAdmin;
+    el.classList.toggle("unlocked", isAdmin);
+    if (!isAdmin) autosizeLockable(el);
+    else el.style.height = "";
+  });
 }
 
 const diarioState = {};
@@ -875,36 +998,11 @@ function renderDiario(card, id) {
   }).join("");
 }
 
-function renderStepper(card, etapas, etapaAtualRaw) {
-  const etapaAtual = parseInt(etapaAtualRaw, 10) || 0;
-  const stepperEl = card.querySelector("[data-stepper]");
-  stepperEl.innerHTML = etapas.map((label, i) => {
-    const n = i + 1;
-    const cls = n < etapaAtual ? "done" : (n === etapaAtual ? "current" : "");
-    const mark = n < etapaAtual ? "✓" : "";
-    return `<li class="${cls}"><span class="dot">${mark}</span><span>${label}</span></li>`;
-  }).join("");
-}
-
-grid.innerHTML = TERRENOS.map(cardHTML).join("");
-
-function autosizeLockable(el) {
-  el.style.height = "auto";
-  el.style.height = el.scrollHeight + "px";
-}
-
-function applyLockState() {
-  grid.querySelectorAll("textarea.lockable").forEach(el => {
-    el.readOnly = !isAdmin;
-    el.classList.toggle("unlocked", isAdmin);
-    if (!isAdmin) autosizeLockable(el);
-    else el.style.height = "";
-  });
-}
-
 TERRENOS.forEach(t => {
   const card = grid.querySelector(`[data-id="${t.id}"]`);
-  renderStepper(card, t.defaults.etapas, t.defaults.etapaAtual);
+  etapasState[t.id] = normalizeEtapas(t.defaults.etapas);
+  etapaAtualState[t.id] = t.defaults.etapaAtual || 0;
+  renderEtapasList(card, t.id);
   diarioState[t.id] = ensureIds(t.defaults.diario ? t.defaults.diario.slice() : []);
   renderDiario(card, t.id);
   renderPrazoBadge(card, t.id);
@@ -927,11 +1025,9 @@ async function loadAll() {
         card.querySelector('[data-field="status"]').value = s.status ?? t.defaults.status;
         card.querySelector('[data-field="cobranca"]').value = s.cobranca ?? t.defaults.cobranca;
         card.querySelector('[data-field="data"]').value = s.data ?? todayISO();
-        const etapasText = s.etapas ?? t.defaults.etapas.join("\n");
-        const etapaAtual = s.etapaAtual ?? t.defaults.etapaAtual;
-        card.querySelector('[data-field="etapas"]').value = etapasText;
-        card.querySelector('[data-field="etapaAtual"]').value = etapaAtual;
-        renderStepper(card, parseEtapas(etapasText), etapaAtual);
+        etapasState[t.id] = normalizeEtapas(s.etapas ?? t.defaults.etapas);
+        etapaAtualState[t.id] = s.etapaAtual ?? t.defaults.etapaAtual ?? 0;
+        renderEtapasList(card, t.id);
         diarioState[t.id] = ensureIds(Array.isArray(s.diario) ? s.diario : (t.defaults.diario ? t.defaults.diario.slice() : []));
         renderDiario(card, t.id);
         renderPrazoBadge(card, t.id);
@@ -954,15 +1050,12 @@ async function saveCard(id) {
   const status = card.querySelector('[data-field="status"]').value;
   const cobranca = card.querySelector('[data-field="cobranca"]').value;
   const data = card.querySelector('[data-field="data"]').value;
-  const etapasText = card.querySelector('[data-field="etapas"]').value;
-  const etapaAtual = card.querySelector('[data-field="etapaAtual"]').value;
 
   try {
     const existing = await apiGet().catch(() => null);
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
-    all[id] = { ...(all[id] || {}), status, cobranca, data, etapas: etapasText, etapaAtual, diario: diarioState[id] || [] };
+    all[id] = { ...(all[id] || {}), status, cobranca, data, diario: diarioState[id] || [] };
     const result = await apiSet(JSON.stringify(all));
-    renderStepper(card, parseEtapas(etapasText), etapaAtual);
     const lastSavedEl = card.querySelector(`[data-lastsaved="${id}"]`);
     if (result) {
       lastSavedEl.textContent = `Atualizado em ${formatDatePt(data)}`;
@@ -1204,10 +1297,36 @@ resyncBtn.addEventListener("click", async () => {
 
 grid.addEventListener("change", (e) => {
   const negSelect = e.target.closest("[data-negselect]");
-  if (negSelect) setNegStatus(negSelect.getAttribute("data-negselect"), negSelect.value);
+  if (negSelect) { setNegStatus(negSelect.getAttribute("data-negselect"), negSelect.value); return; }
+
+  const etapaDate = e.target.closest("[data-etapadatefor]");
+  if (etapaDate) {
+    const tId = etapaDate.getAttribute("data-etapadatefor");
+    const idx = parseInt(etapaDate.getAttribute("data-etapaindex"), 10);
+    setEtapaDate(tId, idx, etapaDate.value);
+  }
 });
 
 grid.addEventListener("click", (e) => {
+  const setCurrentBtn = e.target.closest("[data-etapasetcurrent]");
+  if (setCurrentBtn) {
+    const tId = setCurrentBtn.getAttribute("data-etapasetcurrent");
+    const idx = parseInt(setCurrentBtn.getAttribute("data-etapaindex"), 10);
+    setEtapaAtual(tId, idx);
+    return;
+  }
+
+  const delEtapaBtn = e.target.closest("[data-deletapa]");
+  if (delEtapaBtn) {
+    const tId = delEtapaBtn.getAttribute("data-deletapa");
+    const idx = parseInt(delEtapaBtn.getAttribute("data-etapaindex"), 10);
+    deleteEtapa(tId, idx);
+    return;
+  }
+
+  const addEtapaBtn = e.target.closest("[data-addetapa]");
+  if (addEtapaBtn) { addEtapa(addEtapaBtn.getAttribute("data-addetapa")); return; }
+
   const saveBtn = e.target.closest("[data-save]");
   if (saveBtn) { saveCard(saveBtn.getAttribute("data-save")); return; }
 
