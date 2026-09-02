@@ -1116,23 +1116,37 @@ function renderPrazoBadge(card, id) {
   });
 }
 
-function latestDiarioSummary(id) {
+function latestDiarioEntryOf(id) {
   const entries = diarioState[id] || [];
   if (!entries.length) return null;
-  const latest = entries.slice().sort((a, b) => (a.data > b.data ? 1 : -1)).pop();
+  return entries.slice().sort((a, b) => (a.data > b.data ? 1 : -1)).pop();
+}
+
+function latestDiarioSummary(id) {
+  const latest = latestDiarioEntryOf(id);
+  if (!latest) return null;
   const who = RESP_LABEL[latest.responsavel] || "Outro";
   return `${who} registrou em ${formatDatePt(latest.data)}: ${latest.nota}`;
 }
 
 function syncStatusFromDiario(card, id) {
-  const summary = latestDiarioSummary(id);
-  if (!summary) return null;
+  const latest = latestDiarioEntryOf(id);
+  if (!latest) return null;
+  const who = RESP_LABEL[latest.responsavel] || "Outro";
+  const summary = `${who} registrou em ${formatDatePt(latest.data)}: ${latest.nota}`;
+
   const statusEl = card.querySelector('[data-field="status"]');
   if (statusEl) {
     statusEl.value = summary;
     if (!isAdmin) autosizeLockable(statusEl);
   }
-  return summary;
+
+  const dateEl = card.querySelector('[data-field="data"]');
+  if (dateEl) dateEl.value = latest.data;
+  const lastSavedEl = card.querySelector(`[data-lastsaved="${id}"]`);
+  if (lastSavedEl) lastSavedEl.textContent = `Atualizado em ${formatDatePt(latest.data)}`;
+
+  return { summary, date: latest.data };
 }
 
 async function addDiarioEntry(id) {
@@ -1168,7 +1182,7 @@ async function addDiarioEntry(id) {
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
     all[id] = all[id] || {};
     all[id].diario = diarioState[id];
-    if (statusSummary) all[id].status = statusSummary;
+    if (statusSummary) { all[id].status = statusSummary.summary; all[id].data = statusSummary.date; }
     const result = await apiSet(JSON.stringify(all));
     globalStatus.textContent = result ? `Registro adicionado: ${card.querySelector(".card-title").textContent}` : "Não foi possível salvar o registro.";
   } catch (err) {
@@ -1227,7 +1241,7 @@ async function saveDiarioEdit(id, entryId) {
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
     all[id] = all[id] || {};
     all[id].diario = diarioState[id];
-    if (statusSummary) all[id].status = statusSummary;
+    if (statusSummary) { all[id].status = statusSummary.summary; all[id].data = statusSummary.date; }
     const result = await apiSet(JSON.stringify(all));
     globalStatus.textContent = result ? "Registro editado." : "Não foi possível salvar a edição.";
   } catch (err) {
@@ -1249,7 +1263,7 @@ async function deleteDiarioEntry(id, entryId) {
     const all = existing && existing.value ? JSON.parse(existing.value) : {};
     all[id] = all[id] || {};
     all[id].diario = diarioState[id];
-    if (statusSummary) all[id].status = statusSummary;
+    if (statusSummary) { all[id].status = statusSummary.summary; all[id].data = statusSummary.date; }
     await apiSet(JSON.stringify(all));
     globalStatus.textContent = "Registro excluído.";
   } catch (err) {
@@ -1307,7 +1321,8 @@ resyncBtn.addEventListener("click", async () => {
       renderPrazoBadge(card, t.id);
       if (summary) {
         all[t.id] = all[t.id] || {};
-        all[t.id].status = summary;
+        all[t.id].status = summary.summary;
+        all[t.id].data = summary.date;
         changed++;
       }
     });
